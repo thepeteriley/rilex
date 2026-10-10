@@ -1,0 +1,107 @@
+name: Experimental candidate boot evidence
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful Build candidate ISO workflow run ID in this repository
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  boot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Resolve and verify candidate source revision
+        id: candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > candidate-run.json
+          jq -e '.conclusion == "success" and .path == ".github/workflows/build.yml"' candidate-run.json
+          printf 'source_sha=%s\n' "$(jq -r .head_sha candidate-run.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.candidate.outputs.source_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: rilex-candidate
+          path: dist
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+      - name: Install isolated VM and evidence tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf xvfb x11-utils mesa-utils libgl1-mesa-dri xorriso squashfs-tools lua5.4
+      - name: Verify source, checksum and ISO boot contents
+        env:
+          EXPECTED_SHA: ${{ steps.candidate.outputs.source_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 tests/static-check.py
+          test -f dist/rilex-0.1-amd64.iso
+          test ! -L dist/rilex-0.1-amd64.iso
+          test "$(wc -l < dist/rilex-0.1-amd64.iso.sha256)" -eq 1
+          awk '$1 ~ /^[0-9a-f]+$/ && length($1) == 64 && $2 == "rilex-0.1-amd64.iso" {ok=1} END {exit !ok}' dist/rilex-0.1-amd64.iso.sha256
+          (cd dist && sha256sum --check rilex-0.1-amd64.iso.sha256)
+          ./build/verify-iso.sh dist/rilex-0.1-amd64.iso
+      - name: Boot disposable UEFI VM with software host GL
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          GALLIUM_DRIVER: llvmpipe
+        run: |
+          mkdir -p .cache/boot-smoke
+          evidence="$PWD/.cache/boot-smoke"
+          Xvfb :99 -screen 0 1280x800x24 +extension GLX > "$evidence/xvfb.log" 2>&1 &
+          xvfb_pid=$!
+          export DISPLAY=:99
+          trap 'kill "$xvfb_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if xdpyinfo >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          glxinfo -B > "$evidence/host-gl.txt"
+          qemu-img create -f qcow2 "$evidence/disposable.qcow2" 32G
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd "$evidence/vars.fd"
+          args=(-machine q35 -smp 2 -m 4096 -accel tcg,thread=multi -cpu max
+            -drive "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd"
+            -drive "if=pflash,format=raw,file=$evidence/vars.fd"
+            -drive "file=$evidence/disposable.qcow2,if=virtio,format=qcow2"
+            -drive "file=$PWD/dist/rilex-0.1-amd64.iso,media=cdrom,readonly=on,format=raw"
+            -device virtio-vga-gl -display gtk,gl=on
+            -device qemu-xhci -device usb-tablet -nic user -boot d
+            -serial "file:$evidence/serial.log"
+            -qmp "unix:$evidence/qmp.sock,server=on,wait=off")
+          printf '%q ' qemu-system-x86_64 "${args[@]}" > "$evidence/command.txt"
+          qemu-system-x86_64 "${args[@]}" > "$evidence/qemu.log" 2>&1 &
+          qemu_pid=$!
+          trap 'kill "$qemu_pid" "$xvfb_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if [ -S "$evidence/qmp.sock" ]; then break; fi
+            kill -0 "$qemu_pid"
+            sleep 1
+          done
+          python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-start.txt"
+          sleep 60
+          python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-60s.png"
+          python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-60s.txt"
+          sleep 60
+          python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-120s.png"
+          python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-120s.txt"
+          python3 tests/qmp.py "$evidence/qmp.sock" quit
+          wait "$qemu_pid"
+          printf 'Evidence captured. Desktop and installation remain unverified pending inspection.\n' > "$evidence/result.txt"
+      - name: Save boot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rilex-boot-smoke-evidence
+          path: |
+            .cache/boot-smoke/*.log
+            .cache/boot-smoke/*.txt
+            .cache/boot-smoke/*.png
+          if-no-files-found: warn
