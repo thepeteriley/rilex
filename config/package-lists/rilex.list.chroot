@@ -32,6 +32,8 @@ xdg-utils
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 xwayland
+xserver-xorg-core
+xserver-xorg-input-libinput
 mate-polkit
 sddm
 sddm-theme-breeze
