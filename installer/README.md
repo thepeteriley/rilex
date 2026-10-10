@@ -13,6 +13,10 @@ SDDM is the supported login manager. `shellprocess` removes the live autologin c
 
 The launcher verifies live-medium presence, uses Debian live-config's passwordless live sudo, permits root on XWayland only while Calamares runs, and restores the stale live fstab afterward. This avoids embedding live-user credentials. It never runs unattended or selects a disk programmatically.
 
-Calamares configuration and actual bootloader commands must be checked in the built guest. Five passing static tests are not a release qualification.
+Calamares configuration and actual bootloader commands must be checked in the built guest. Six passing static tests are not a release qualification.
 
 Installer rootfs is staged as a live-build includes.chroot overlay, never inside rilex-defaults.deb. This avoids dpkg ownership collisions with calamares-settings-debian. Debian sources-final writes trixie, trixie-security, trixie-updates and trixie-backports, including main and non-free-firmware. Calamares 3.3.14 bootloader source explicitly invokes grub-install with --target=x86_64-efi or --target=i386-pc, confirming that preinstalled platform payloads satisfy its normal bootloader interface. Both facts still need functional VM verification.
+
+## Partition configuration provenance
+
+Neither inspected Debian package supplies a partition.conf. The complete upstream Calamares v3.3.14 default file is preserved in the overlay, including its CC0-1.0 notice, EFI mount point, swap choices, filesystem and initial selection. Source: https://github.com/calamares/calamares/blob/v3.3.14/src/modules/partition/partition.conf . Only `allowManualPartitioning: true` and `enableLuksAutomatedPartitioning: false` are explicitly changed. The latter is the actual key read by PartitionViewStep.cpp in that version; an `allowEncrypt` option does not exist. This hides automatic encryption, while native manual partition editing can still offer encryption. Manual encrypted installation is unsupported in Rilex 0.1 and must not be selected. Disabling the entire manual workflow would remove required installation functionality.

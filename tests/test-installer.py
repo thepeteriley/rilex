@@ -28,6 +28,14 @@ class InstallerConfiguration(unittest.TestCase):
         s = (ROOT / 'build/build-packages.sh').read_text()
         self.assertNotIn('installer/rootfs', s)
         self.assertIn('"$ROOT/installer/rootfs/"', (ROOT / 'build/build-iso.sh').read_text())
+    def test_partition_defaults_and_unverified_encryption(self):
+        s = (BASE / 'modules/partition.conf').read_text()
+        self.assertIn('enableLuksAutomatedPartitioning: false', s)
+        self.assertIn('allowManualPartitioning: true', s)
+        self.assertIn('mountPoint:         "/boot/efi"', s)
+        self.assertIn('userSwapChoices:', s)
+        self.assertIn('initialPartitioningChoice: none', s)
+        self.assertIn('defaultFileSystemType:  "ext4"', s)
     def test_no_credentials(self):
         for f in (ROOT / 'installer/rootfs').rglob('*'):
             if f.is_file():
