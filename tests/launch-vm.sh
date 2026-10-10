@@ -29,6 +29,7 @@ fi
 if [[ $MODE != installed ]]; then
  [[ -f "$ISO" && ! -L "$ISO" ]] || { echo 'ISO must be a regular file.' >&2; exit 1; }
  args+=(-drive "file=$ISO,media=cdrom,readonly=on,format=raw" -boot d)
+ if [[ -f "$ROOT/.cache/qa-seed.iso" ]]; then args+=(-drive "file=$ROOT/.cache/qa-seed.iso,media=cdrom,readonly=on,format=raw"); fi
 fi
 printf '%q ' qemu-system-x86_64 "${args[@]}" > "$QA/command.txt"
 printf '\n' >> "$QA/command.txt"

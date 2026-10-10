@@ -55,3 +55,21 @@ These are test-session environment variables, not installed desktop defaults. If
 This path is an inference from the pinned sources, pending runtime verification: [Hyprland v0.55.2 OpenGL.cpp](https://github.com/hyprwm/Hyprland/blob/v0.55.2/src/render/OpenGL.cpp) falls back to the primary DRM node and GBM, while [Aquamarine v0.10.0 DRM.cpp](https://github.com/hyprwm/aquamarine/blob/v0.10.0/src/backend/drm/DRM.cpp) implements `AQ_NO_MODIFIERS` and `AQ_NO_ATOMIC`. The resulting Mesa software renderer must still provide working GBM buffers and DRM PRIME import; failures can prevent the compositor starting.
 
 Old `WLR_RENDERER_ALLOW_SOFTWARE` and `WLR_BACKENDS` instructions target Hyprland's previous wlroots architecture and do not configure this Aquamarine release. Bare Aquamarine headless does not eliminate the DRM allocator requirement. Nesting inside a pixman-only Weston is also insufficient: the [Aquamarine Wayland backend](https://github.com/hyprwm/aquamarine/blob/v0.10.0/src/backend/Wayland.cpp) requires `zwp_linux_dmabuf_v1`, valid device feedback and a DRM node. A nested successful session would validate applications/configuration, but would still need separate direct live-boot validation.
+
+For temporary SSH access in the disposable live QA VM, run
+`tests/create-qa-seed.sh` before launching it. This creates a separate virtual
+CD and a local ephemeral key under ignored `.cache`; neither enters the Rilex
+ISO. In the live terminal, mount the second CD read-only and run:
+
+```sh
+sudo mount -o ro /dev/sr1 /mnt
+/mnt/check-live-session.sh > /tmp/live-checks.log 2>&1
+sudo /mnt/bootstrap.sh
+```
+
+The helper refuses a non-QEMU or non-live system and installs OpenSSH through
+signed Debian APT. Access binds to the launcher's loopback port 2223 using
+`.cache/qa_ed25519`. Destroy the disposable live VM after testing; this temporary
+SSH setup is not part of the released operating system. Use QMP `type` for US
+keyboard input when no VNC client is available; text is literal and key events
+are paced.
