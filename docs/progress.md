@@ -85,3 +85,10 @@ created only the disposable vda partitions, and began unpackfs. Super+2 switched
 workspaces and Fuzzel successfully launched Foot. All 53 bindings were present
 in actual `hyprctl -j binds` output. Installation completion/independent reboot
 remain pending.
+
+Generated VM/download caches were atomically relocated to
+`/Users/pete/.cache/rilex-build-20261010`, with the project `.cache` path kept
+as a symlink. Dropbox had been hashing actively written VM files continuously.
+The rename stayed on the same filesystem; both QA VMs remained running and
+QMP endpoints passed status checks. Credentials remain in the ignored private
+cache directory, not the source or distribution image.
