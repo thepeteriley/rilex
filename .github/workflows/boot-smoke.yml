@@ -67,7 +67,9 @@ jobs:
           glxinfo -B > "$evidence/host-gl.txt"
           qemu-img create -f qcow2 "$evidence/disposable.qcow2" 32G
           cp /usr/share/OVMF/OVMF_VARS_4M.fd "$evidence/vars.fd"
-          args=(-machine q35 -smp 2 -m 4096 -accel tcg,thread=multi -cpu max
+          accel=(-accel tcg,thread=multi -cpu max)
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then accel=(-accel kvm -cpu host); fi
+          args=(-machine q35 -smp 2 -m 4096 "${accel[@]}"
             -drive "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd"
             -drive "if=pflash,format=raw,file=$evidence/vars.fd"
             -drive "file=$evidence/disposable.qcow2,if=virtio,format=qcow2"
@@ -86,6 +88,8 @@ jobs:
             sleep 1
           done
           python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-start.txt"
+          sleep 10
+          python3 tests/qmp.py "$evidence/qmp.sock" key ret
           sleep 60
           python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-60s.png"
           python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-60s.txt"
