@@ -34,6 +34,10 @@ xdg-desktop-portal-gtk
 xwayland
 mate-polkit
 sddm
+sddm-theme-breeze
+less
+libnotify-bin
+dconf-gsettings-backend
 foot
 waybar
 fuzzel
