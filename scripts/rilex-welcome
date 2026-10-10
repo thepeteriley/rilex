@@ -1,20 +1,56 @@
 #!/bin/bash
-set -eu
+set -u
 config=${XDG_CONFIG_HOME:-"$HOME/.config"}
 state=${XDG_STATE_HOME:-"$HOME/.local/state"}/rilex
-mkdir -p "$state"
-touch "$state/welcome-seen"
-pause() { read -r -p 'Press Enter to continue... ' _; }
+mkdir -p "$state" || exit 1
+touch "$state/welcome-seen" || exit 1
+pause() { read -r -p 'Press Enter to continue... ' _ || exit 0; }
+set_gtk_theme() {
+ local preference=$1
+ if ! python3 - "$config/gtk-3.0/settings.ini" "$preference" <<'PYGTK'
+import configparser
+import pathlib
+import sys
+path = pathlib.Path(sys.argv[1])
+dark = sys.argv[2] == "dark"
+settings = configparser.ConfigParser(interpolation=None)
+settings.optionxform = str
+try:
+    if path.exists():
+        with path.open() as stream:
+            settings.read_file(stream)
+    if not settings.has_section("Settings"):
+        settings.add_section("Settings")
+    settings.set("Settings", "gtk-theme-name", "Adwaita-dark" if dark else "Adwaita")
+    settings.set("Settings", "gtk-application-prefer-dark-theme", "true" if dark else "false")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w") as stream:
+        settings.write(stream)
+except (OSError, configparser.Error) as error:
+    print(f"Could not update GTK preferences: {error}", file=sys.stderr)
+    sys.exit(1)
+PYGTK
+ then return 1; fi
+ if command -v gsettings >/dev/null && gsettings list-schemas | rg -qx org.gnome.desktop.interface; then
+  if [ "$preference" = dark ]; then
+   gsettings set org.gnome.desktop.interface color-scheme prefer-dark && gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+  else
+   gsettings set org.gnome.desktop.interface color-scheme default && gsettings set org.gnome.desktop.interface gtk-theme Adwaita
+  fi
+  if [ "$?" -ne 0 ]; then printf 'GTK file preferences saved; desktop settings service could not be updated.\n'; fi
+ fi
+ printf 'GTK preferences saved. Restart applications to apply file preferences.\n'
+}
 while true; do
  clear
  printf 'Rilex 0.1 — A Linux desktop built for keyboards\n\n'
- printf '%s\n' '1  Search keyboard shortcuts' '2  Configure Wi-Fi (nmtui)' '3  Configure Bluetooth' '4  Check and install Debian updates' '5  Wallpaper and desktop theme' '6  Terminal preferences' '7  System information' '8  Read local documentation' '9  Install additional software' '0  Close welcome'
+ printf '%s\n' '1  Search keyboard shortcuts' '2  Configure Wi-Fi (nmtui)' '3  Configure Bluetooth' '4  Check and install Debian updates' '5  Wallpaper and GTK application theme' '6  Terminal preferences' '7  System information' '8  Read local documentation' '9  Install additional software' '0  Close welcome'
  read -r -p '> ' choice || exit 0
  case "$choice" in
   1) rilex-shortcuts ;;
   2) nmtui ;;
   3) blueman-manager >/dev/null 2>&1 & ;;
-  4) printf 'APT updates use the configured Debian repositories. Authentication uses sudo.\n'; sudo apt-get update && sudo apt-get upgrade; pause ;;
+  4) printf 'APT updates use the configured Debian repositories. Authentication uses sudo.\n'; if ! sudo apt-get update || ! sudo apt-get upgrade; then printf 'Update failed or was cancelled; review the output above.\n'; fi; pause ;;
   5) printf 'Wallpaper: enter an absolute image path, or blank for the Rilex default.\n'; read -r -p 'Image: ' image
      if [ -z "$image" ]; then image=/usr/share/rilex/wallpapers/rilex.svg; fi
      if [[ "$image" = /* && -f "$image" ]]; then
@@ -22,10 +58,10 @@ while true; do
       pkill -u "$(id -u)" -x swaybg || true; rilex-wallpaper >/dev/null 2>&1 &
      else printf 'The image must be an existing absolute path.\n'; fi
      printf 'GTK theme: 1 dark, 2 light, Enter unchanged\n'; read -r theme
-     case "$theme" in 1) gsettings set org.gnome.desktop.interface color-scheme prefer-dark; gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark;; 2) gsettings set org.gnome.desktop.interface color-scheme default; gsettings set org.gnome.desktop.interface gtk-theme Adwaita;; esac
+     case "$theme" in 1) set_gtk_theme dark;; 2) set_gtk_theme light;; esac
      pause ;;
   6) mkdir -p "$config/foot"; [ -f "$config/foot/foot.ini" ] || cp /etc/rilex/foot/foot.ini "$config/foot/foot.ini"; nano "$config/foot/foot.ini" ;;
-  7) cat /etc/os-release; printf '\n'; uname -a; printf '\n'; hyprctl version; printf '\n'; free -h; pause ;;
+  7) cat /etc/os-release; printf '\n'; uname -a; printf '\n'; hyprctl version || printf 'Hyprland is unavailable in this terminal session.\n'; printf '\n'; free -h; pause ;;
   8) file=$(find /usr/share/doc/rilex-defaults -maxdepth 1 -name '*.md' -printf '%f\n' | fzf --prompt='Documentation > ') || continue
      [ -n "$file" ] && less "/usr/share/doc/rilex-defaults/$file" ;;
   9) printf 'Install Debian software with sudo apt install PACKAGE.\nUse apt search NAME to discover packages.\nUse pipx for Python CLI applications and python3 -m venv for projects.\nDo not replace Debian-managed Python packages with sudo pip.\n\nOptional development tools: sudo apt install gfortran r-base valgrind\n'; pause ;;
