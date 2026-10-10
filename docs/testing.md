@@ -41,3 +41,17 @@ These launch/control tools do not assert a passing desktop or installer test.
 Every interaction still needs observation and recorded results. VNC and
 forwarded SSH ports bind only to loopback; no credentials are included in the
 source or release payload.
+
+## Hyprland graphics under software-emulated QEMU
+
+A plain `virtio-vga` virtual device presents a KMS display without host GL acceleration. For a diagnostic attempt from an active guest VT (after stopping SDDM), run as the live user:
+
+```sh
+LIBGL_ALWAYS_SOFTWARE=1 AQ_NO_MODIFIERS=1 Hyprland --config /etc/xdg/hypr/hyprland.lua
+```
+
+These are test-session environment variables, not installed desktop defaults. If logs specifically show atomic commit failure, retry with `AQ_NO_ATOMIC=1`. Ensure Mesa's Debian `libgl1-mesa-dri` package is installed. Successful initialization must show the actual renderer in the Hyprland log and a usable desktop; setting an environment variable does not itself establish software rendering. A TTY/session without DRM device access is a different failure and must be diagnosed before adjusting rendering.
+
+This path is an inference from the pinned sources, pending runtime verification: [Hyprland v0.55.2 OpenGL.cpp](https://github.com/hyprwm/Hyprland/blob/v0.55.2/src/render/OpenGL.cpp) falls back to the primary DRM node and GBM, while [Aquamarine v0.10.0 DRM.cpp](https://github.com/hyprwm/aquamarine/blob/v0.10.0/src/backend/drm/DRM.cpp) implements `AQ_NO_MODIFIERS` and `AQ_NO_ATOMIC`. The resulting Mesa software renderer must still provide working GBM buffers and DRM PRIME import; failures can prevent the compositor starting.
+
+Old `WLR_RENDERER_ALLOW_SOFTWARE` and `WLR_BACKENDS` instructions target Hyprland's previous wlroots architecture and do not configure this Aquamarine release. Bare Aquamarine headless does not eliminate the DRM allocator requirement. Nesting inside a pixman-only Weston is also insufficient: the [Aquamarine Wayland backend](https://github.com/hyprwm/aquamarine/blob/v0.10.0/src/backend/Wayland.cpp) requires `zwp_linux_dmabuf_v1`, valid device feedback and a DRM node. A nested successful session would validate applications/configuration, but would still need separate direct live-boot validation.
