@@ -124,6 +124,16 @@ jobs:
             python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-120s.png"
           fi
           python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-120s.txt"
+          # TCG startup can take several minutes; retain intermediate evidence.
+          for elapsed in 180 240 300; do
+            sleep 60
+            if [ "$GRAPHICS" = virgl ]; then
+              import -window root "$evidence/boot-${elapsed}s.png"
+            else
+              python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-${elapsed}s.png"
+            fi
+            python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-${elapsed}s.txt"
+          done
           python3 tests/qmp.py "$evidence/qmp.sock" quit
           wait "$qemu_pid"
           printf 'Evidence captured. Desktop and installation remain unverified pending inspection.\n' > "$evidence/result.txt"
