@@ -3,7 +3,7 @@ set -euo pipefail
 ISO=${1:?Usage: build/verify-iso.sh dist/rilex-0.1-amd64.iso}
 [[ -s "$ISO" ]] || { echo "Missing or empty ISO: $ISO" >&2; exit 1; }
 command -v xorriso >/dev/null
-LIST=$(xorriso -indev "$ISO" -find / -type f -print 2>/dev/null)
+LIST=$(xorriso -indev "$ISO" -find / -type f -exec echo 2>/dev/null)
 for pattern in '/live/filesystem.squashfs' '/live/vmlinuz' '/live/initrd'; do
  printf '%s\n' "$LIST" | grep -F "$pattern" >/dev/null || { echo "Missing ISO component: $pattern" >&2; exit 1; }
 done
