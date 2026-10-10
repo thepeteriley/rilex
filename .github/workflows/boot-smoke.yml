@@ -120,6 +120,8 @@ jobs:
             python3 tests/qmp.py "$evidence/qmp.sock" key e
             sleep 2
             python3 tests/qmp.py "$evidence/qmp.sock" key ctrl-home
+            # GRUB inserts a blank line after setparams; linux is the next line.
+            python3 tests/qmp.py "$evidence/qmp.sock" key down
             python3 tests/qmp.py "$evidence/qmp.sock" key down
             python3 tests/qmp.py "$evidence/qmp.sock" key end
             python3 tests/qmp.py "$evidence/qmp.sock" type ' systemd.debug_shell=1 console=ttyS0,115200'
