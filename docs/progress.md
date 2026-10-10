@@ -17,7 +17,7 @@ Status: development, not a verified release.
 - [x] Implement live-build and Debian defaults package.
 - [x] Implement Hyprland desktop and welcome utility; 53 expanded bindings statically checked.
 - [x] Configure Calamares and run five static checks; runtime installation pending.
-- [ ] Build real hybrid ISO.
+- [x] Build real hybrid ISO (two hosted candidates; release qualification pending).
 - [ ] Test UEFI/BIOS live desktop.
 - [ ] Install to disposable VM disk and independently boot.
 - [x] Publish source repository: https://github.com/thepeteriley/rilex.
@@ -32,7 +32,7 @@ Hosted candidate builds were superseded after integration review; the current
 build is tracked in GitHub Actions. Local emulated amd64 guest prerequisites
 installed, and its disposable root filesystem expanded to 79 GiB. Reviewed and fixed Debian installer file ownership,
 live-config SDDM session override, and invalid xorriso verifier command.
-Source static checks pass; no live desktop or installation pass is claimed.
+Source static checks pass; runtime results are recorded below.
 
 Package payload comparison passed against seven actual Debian packages (Foot,
 Fuzzel, Waybar, Mako, Calamares settings, SDDM, Breeze). Vendor conffiles are
@@ -46,3 +46,19 @@ No hash/signature/TLS validation was disabled. Source 530981f is frozen for the
 resumed local candidate. The source recipe now selects lightweight Maui instead
 of Breeze to avoid importing Plasma. Hosted candidate d642a14 remains useful
 for initial desktop diagnosis; a compact current-source hosted build also runs.
+
+## Real candidate evidence
+Hosted run [38076402014](https://github.com/thepeteriley/rilex/actions/runs/38076402014)
+built source 3d36fcd successfully. The downloaded archive digest and ISO checksum
+passed. The real compact ISO is `dist/rilex-0.1-amd64.iso`, 1,769,701,376 bytes,
+SHA-256 `bc362bf1779ea714736b7aaa140f54a504118588de713cb6c9982f11d997c800`.
+Its live filesystem, kernel/initramfs, BIOS and UEFI boot entries passed structural
+checks. It is a development candidate, not a verified release.
+
+Earlier candidate d642a14 was booted under QEMU TCG on macOS ARM64. UEFI GRUB
+loaded kernel 6.12.111, mounted the live SquashFS and entered Hyprland. Rilex
+welcome, wallpaper and Foot appeared; Super+Enter opened terminal windows.
+Waybar, portals, application launching and installation remain under investigation.
+This runtime evidence belongs to the earlier candidate, not the compact ISO.
+The upstream session watchdog invocation was corrected after seeing its warning.
+No independent installed-system boot has yet passed; no release/tag exists.
