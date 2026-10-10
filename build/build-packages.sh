@@ -21,6 +21,10 @@ cp "$ROOT/desktop/themes/mako.conf" "$STAGE/etc/xdg/mako/config"
 cp "$ROOT/desktop/themes/gtk-settings.ini" "$STAGE/etc/gtk-3.0/settings.ini"
 cp "$ROOT/desktop/wallpapers/rilex.svg" "$STAGE/usr/share/rilex/wallpapers/"
 cp "$ROOT/desktop/themes/rilex-logo.svg" "$STAGE/usr/share/icons/hicolor/scalable/apps/rilex.svg"
+mkdir -p "$STAGE/usr/share/rilex"
+REVISION=${RILEX_SOURCE_REVISION:-$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || printf unknown)}
+printf 'NAME=Rilex\nVERSION=0.1\nSOURCE_REVISION=%s\n' "$REVISION" > "$STAGE/usr/share/rilex/build-info"
+printf '%s\n' "$REVISION" > "$ROOT/dist/source-revision.txt"
 cp -a "$ROOT/docs/." "$STAGE/usr/share/doc/rilex-defaults/"
 [[ ! -f "$ROOT/LICENSE" ]] || cp "$ROOT/LICENSE" "$STAGE/usr/share/doc/rilex-defaults/copyright"
 find "$STAGE/etc" -type f -print 2>/dev/null | sed "s|$STAGE||" > "$STAGE/DEBIAN/conffiles" || true
