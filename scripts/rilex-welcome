@@ -1,0 +1,34 @@
+#!/bin/bash
+set -eu
+config=${XDG_CONFIG_HOME:-"$HOME/.config"}
+state=${XDG_STATE_HOME:-"$HOME/.local/state"}/rilex
+mkdir -p "$state"
+touch "$state/welcome-seen"
+pause() { read -r -p 'Press Enter to continue... ' _; }
+while true; do
+ clear
+ printf 'Rilex 0.1 — A Linux desktop built for keyboards\n\n'
+ printf '%s\n' '1  Search keyboard shortcuts' '2  Configure Wi-Fi (nmtui)' '3  Configure Bluetooth' '4  Check and install Debian updates' '5  Wallpaper and desktop theme' '6  Terminal preferences' '7  System information' '8  Read local documentation' '9  Install additional software' '0  Close welcome'
+ read -r -p '> ' choice || exit 0
+ case "$choice" in
+  1) rilex-shortcuts ;;
+  2) nmtui ;;
+  3) blueman-manager >/dev/null 2>&1 & ;;
+  4) printf 'APT updates use the configured Debian repositories. Authentication uses sudo.\n'; sudo apt-get update && sudo apt-get upgrade; pause ;;
+  5) printf 'Wallpaper: enter an absolute image path, or blank for the Rilex default.\n'; read -r -p 'Image: ' image
+     if [ -z "$image" ]; then image=/usr/share/rilex/wallpapers/rilex.svg; fi
+     if [[ "$image" = /* && -f "$image" ]]; then
+      mkdir -p "$config/rilex"; printf '%s\n' "$image" > "$config/rilex/wallpaper"
+      pkill -u "$(id -u)" -x swaybg || true; rilex-wallpaper >/dev/null 2>&1 &
+     else printf 'The image must be an existing absolute path.\n'; fi
+     printf 'GTK theme: 1 dark, 2 light, Enter unchanged\n'; read -r theme
+     case "$theme" in 1) gsettings set org.gnome.desktop.interface color-scheme prefer-dark; gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark;; 2) gsettings set org.gnome.desktop.interface color-scheme default; gsettings set org.gnome.desktop.interface gtk-theme Adwaita;; esac
+     pause ;;
+  6) mkdir -p "$config/foot"; [ -f "$config/foot/foot.ini" ] || cp /etc/xdg/foot/foot.ini "$config/foot/foot.ini"; nano "$config/foot/foot.ini" ;;
+  7) cat /etc/os-release; printf '\n'; uname -a; printf '\n'; hyprctl version; printf '\n'; free -h; pause ;;
+  8) file=$(find /usr/share/doc/rilex -maxdepth 1 -name '*.md' -printf '%f\n' | fzf --prompt='Documentation > ') || continue
+     [ -n "$file" ] && less "/usr/share/doc/rilex/$file" ;;
+  9) printf 'Install Debian software with sudo apt install PACKAGE.\nUse apt search NAME to discover packages.\nUse pipx for Python CLI applications and python3 -m venv for projects.\nDo not replace Debian-managed Python packages with sudo pip.\n\nOptional development tools: sudo apt install gfortran r-base valgrind\n'; pause ;;
+  0) exit 0 ;;
+ esac
+done

@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+# A live account has no user-selected unlock password.
+if [ -e /run/live/medium ] && [ "$(id -un)" = live ]; then
+ notify-send "Live session" "Screen locking is available after installation with your own password."
+ exit 0
+fi
+# This entry point only locks.
+exec hyprlock

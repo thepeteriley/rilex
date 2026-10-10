@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Rilex Welcome
+Comment=Keyboard shortcuts, configuration and system help
+Exec=foot --title=Rilex-Welcome rilex-welcome
+Icon=rilex
+Terminal=false
+Categories=System;

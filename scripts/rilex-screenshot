@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+geometry=$(slurp) || exit 0
+[ -n "$geometry" ] || exit 0
+pictures=$(xdg-user-dir PICTURES)
+mkdir -p "$pictures/Screenshots"
+file="$pictures/Screenshots/rilex-$(date +%Y%m%d-%H%M%S).png"
+grim -g "$geometry" "$file"
+wl-copy --type image/png < "$file"
+notify-send 'Screenshot saved and copied' "$file"

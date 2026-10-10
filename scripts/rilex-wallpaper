@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+file=${XDG_CONFIG_HOME:-"$HOME/.config"}/rilex/wallpaper
+wallpaper=/usr/share/rilex/wallpapers/rilex.svg
+if [ -f "$file" ]; then IFS= read -r wallpaper < "$file"; fi
+if [ ! -f "$wallpaper" ]; then wallpaper=/usr/share/rilex/wallpapers/rilex.svg; fi
+exec swaybg -i "$wallpaper" -m fill

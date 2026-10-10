@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+export XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland XDG_SESSION_TYPE=wayland
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE
+systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
+waybar &
+mako &
+rilex-wallpaper &
+/usr/libexec/polkit-mate-authentication-agent-1 &
+wl-paste --type text --watch cliphist store &
+wl-paste --type image --watch cliphist store &
+state=${XDG_STATE_HOME:-"$HOME/.local/state"}/rilex
+mkdir -p "$state"
+if [ ! -f "$state/welcome-seen" ]; then
+ foot --title=Rilex-Welcome rilex-welcome &
+fi
+wait

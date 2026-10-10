@@ -1,0 +1,15 @@
+{
+ "layer": "top", "position": "top", "height": 32,
+ "modules-left": ["custom/rilex", "hyprland/workspaces"],
+ "modules-center": ["clock"],
+ "modules-right": ["network", "bluetooth", "pulseaudio", "backlight", "battery", "tray"],
+ "custom/rilex": {"format": "Rilex", "on-click": "foot rilex-welcome", "tooltip-format": "Super + W: Welcome"},
+ "hyprland/workspaces": {"format": "{id}"},
+ "clock": {"format": "{:%a %d %b  %H:%M}", "tooltip-format": "{:%Y-%m-%d}"},
+ "network": {"format-wifi": "Wi-Fi {essid}", "format-ethernet": "LAN", "format-disconnected": "Offline", "on-click": "foot nmtui"},
+ "bluetooth": {"format": "BT {status}", "on-click": "blueman-manager"},
+ "pulseaudio": {"format": "Vol {volume}%", "format-muted": "Muted", "on-click": "pavucontrol"},
+ "backlight": {"format": "Light {percent}%"},
+ "battery": {"format": "Bat {capacity}%", "format-charging": "Charging {capacity}%", "states": {"warning": 25, "critical": 10}},
+ "tray": {"spacing": 8}
+}

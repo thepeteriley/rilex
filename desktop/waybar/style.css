@@ -1,0 +1,7 @@
+* { font-family: "DejaVu Sans", sans-serif; font-size: 12px; border: none; border-radius: 0; }
+window#waybar { background: #20252d; color: #d9e0e8; }
+#workspaces button { color: #aab6c4; padding: 0 9px; }
+#workspaces button.active { color: #ffffff; background: #40556d; }
+#custom-rilex { color: #91b0cf; font-weight: bold; }
+#custom-rilex, #clock, #network, #bluetooth, #pulseaudio, #backlight, #battery, #tray { padding: 0 12px; }
+#battery.critical { color: #f0a0a0; }

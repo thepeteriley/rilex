@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Rilex (Hyprland)
+Comment=Rilex keyboard-first Wayland desktop
+Exec=Hyprland --config /etc/xdg/hypr/hyprland.lua
+Type=Application
+DesktopNames=Hyprland;

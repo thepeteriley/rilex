@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+cat <<'KEYS' | fuzzel --dmenu --prompt='Search shortcuts > ' >/dev/null
+Super + Enter       Terminal
+Super + Space       Application launcher
+Super + Q           Close window
+Super + 1–9         Switch workspace
+Super + Shift + 1–9 Move window to workspace
+Super + H/J/K/L     Focus left/down/up/right
+Super + Shift + H/J/K/L Move window left/down/up/right
+Super + Ctrl + H/J/K/L Resize window
+Super + Ctrl + Shift + H/L Move workspace to previous/next monitor
+Super + F           Fullscreen
+Super + V           Float window
+Super + Shift + Space Toggle split orientation (dwindle)
+Super + E           Thunar file manager
+Super + B           Firefox ESR
+Super + Shift + S   Screenshot region (copied and saved)
+Super + Escape      Lock
+Super + slash       Search this reference
+Super + C           Clipboard history
+Super + W           Welcome utility
+Volume keys         Change/mute output; microphone key mutes input
+Brightness keys     Screen brightness
+KEYS
