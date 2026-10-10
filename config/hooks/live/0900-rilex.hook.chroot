@@ -1,5 +1,9 @@
 #!/bin/sh
 set -eu
+# debootstrap creates a regular build-specific /etc/os-release which overrides
+# /usr/lib/os-release. Restore Debian's ordinary relative symlink after package
+# installation; live-build then removes its temporary local diversion.
+ln -sfn ../usr/lib/os-release /etc/os-release
 printf 'Rilex 0.1 (Debian 13) \\n \\l\n' > /etc/issue
 printf 'Rilex: A Linux desktop built for people who prefer keyboards to mice.\nRun rilex-welcome for help. Based on Debian 13; an independent project.\n' > /etc/motd
 printf 'rilex\n' > /etc/hostname
