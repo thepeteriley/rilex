@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+# Remove retains administrator conffiles; purge restores original Debian files.
+if [ "$1" = purge ]; then
+ for path in /etc/xdg/foot/foot.ini /etc/xdg/fuzzel/fuzzel.ini /etc/xdg/waybar/config.jsonc /etc/xdg/waybar/style.css; do
+  dpkg-divert --package rilex-defaults --remove --rename --divert "$path.debian" "$path"
+ done
+fi

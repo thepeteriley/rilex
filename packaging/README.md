@@ -1,6 +1,6 @@
 # Rilex packages
 
-`build/build-packages.sh` builds `dist/rilex-defaults_0.1.0_all.deb` with Debian's `dpkg-deb`. It contains desktop defaults, original artwork, welcome helpers, and documentation. Files under `/etc` are Debian conffiles, preserving administrator edits on upgrade; per-user settings belong under `$XDG_CONFIG_HOME`.
+`build/build-packages.sh` builds `dist/rilex-defaults_0.1.0_all.deb` with Debian's `dpkg-deb`. It contains desktop defaults, original artwork, welcome helpers, and documentation. Debian-owned Foot, Fuzzel and Waybar defaults are preserved by package-scoped `dpkg-divert` under adjacent `.debian` filenames, and restored on package purge. Files under `/etc` are Debian conffiles, preserving administrator edits on upgrade; per-user settings belong under `$XDG_CONFIG_HOME`.
 
 The package is generated from the tracked `desktop`, `scripts` and `docs` source trees. The live-build overlay (Calamares settings, password locking and live autologin) is deliberately not in this package. Calamares removes its live autologin configuration and installer launchers from the installed target.
 

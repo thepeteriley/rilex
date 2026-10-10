@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+# Keep Debian vendor defaults independently owned and available for restoration.
+# Rilex owns the canonical configuration only while this package is installed.
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+ for path in /etc/xdg/foot/foot.ini /etc/xdg/fuzzel/fuzzel.ini /etc/xdg/waybar/config.jsonc /etc/xdg/waybar/style.css; do
+  dpkg-divert --package rilex-defaults --add --rename --divert "$path.debian" "$path"
+ done
+fi

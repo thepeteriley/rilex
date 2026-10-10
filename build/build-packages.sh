@@ -24,5 +24,5 @@ cp "$ROOT/desktop/themes/rilex-logo.svg" "$STAGE/usr/share/icons/hicolor/scalabl
 cp -a "$ROOT/docs/." "$STAGE/usr/share/doc/rilex-defaults/"
 [[ ! -f "$ROOT/LICENSE" ]] || cp "$ROOT/LICENSE" "$STAGE/usr/share/doc/rilex-defaults/copyright"
 find "$STAGE/etc" -type f -print 2>/dev/null | sed "s|$STAGE||" > "$STAGE/DEBIAN/conffiles" || true
-chmod 755 "$STAGE/DEBIAN/postinst"
+chmod 755 "$STAGE/DEBIAN/preinst" "$STAGE/DEBIAN/postinst" "$STAGE/DEBIAN/postrm"
 dpkg-deb --root-owner-group --build "$STAGE" "$ROOT/dist/rilex-defaults_0.1.0_all.deb"
