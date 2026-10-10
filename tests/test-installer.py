@@ -24,6 +24,10 @@ class InstallerConfiguration(unittest.TestCase):
         s = (BASE / 'modules/bootloader.conf').read_text()
         self.assertIn('efiBootLoader: grub', s)
         self.assertIn('installEFIFallback: true', s)
+    def test_installer_not_packaged_over_debian_files(self):
+        s = (ROOT / 'build/build-packages.sh').read_text()
+        self.assertNotIn('installer/rootfs', s)
+        self.assertIn('"$ROOT/installer/rootfs/"', (ROOT / 'build/build-iso.sh').read_text())
     def test_no_credentials(self):
         for f in (ROOT / 'installer/rootfs').rglob('*'):
             if f.is_file():
