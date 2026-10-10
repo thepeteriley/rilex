@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install Rilex
+Comment=Install Rilex onto a disk using the graphical installer
+Exec=rilex-install
+Icon=/etc/calamares/branding/rilex/logo.svg
+Terminal=false
+Categories=System;

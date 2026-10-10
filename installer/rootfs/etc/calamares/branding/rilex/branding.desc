@@ -1,0 +1,26 @@
+---
+componentName: rilex
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 900px,640px
+windowPlacement: center
+strings:
+  productName: Rilex Linux
+  shortProductName: Rilex
+  version: '0.1'
+  shortVersion: '0.1'
+  versionedName: Rilex 0.1
+  shortVersionedName: Rilex 0.1
+  bootloaderEntryName: Rilex
+sidebar: widget
+navigation: widget
+images:
+  productLogo: logo.svg
+  productIcon: logo.svg
+  productWelcome: logo.svg
+style:
+  SidebarBackground: '#20252c'
+  SidebarText: '#e3e7ed'
+  SidebarTextCurrent: '#ffffff'
+  SidebarBackgroundCurrent: '#415e7c'

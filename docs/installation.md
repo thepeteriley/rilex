@@ -1,0 +1,15 @@
+# Installing Rilex
+
+Rilex is a Debian derivative, not an official Debian product. Only install a release whose testing record confirms an independent installed-system boot. At present this project is in development; consult `testing.md` for actual results.
+
+Download the ISO and adjacent SHA-256 file from the published release, when one exists. On Linux run `sha256sum -c rilex-0.1-amd64.iso.sha256`; on macOS compare `shasum -a 256 rilex-0.1-amd64.iso` to the checksum. On Windows use PowerShell `Get-FileHash .\rilex-0.1-amd64.iso -Algorithm SHA256`.
+
+Write the ISO with a graphical imaging utility that supports hybrid Linux ISOs. On Windows, Rufus in DD mode is suitable; on macOS and Linux, a compatible image writer can select the ISO and USB drive. Review the target's model and capacity carefully: imaging erases the USB drive. Avoid generic copy operations: copying the ISO file onto an existing USB filesystem does not make bootable media. Advanced Linux users can use `sudo dd if=rilex-0.1-amd64.iso of=/dev/USB_DEVICE bs=4M status=progress conv=fsync` after identifying and unmounting only their USB drive. `/dev/USB_DEVICE` is a placeholder, never a command to run unchanged. On macOS use Disk Utility to identify the USB, unmount its volumes, then `sudo dd if=rilex-0.1-amd64.iso of=/dev/rdiskUSB_NUMBER bs=4m` and eject it when complete. Confirm the destination again immediately before executing any write command.
+
+On a spare laptop, back up its data, disable Secure Boot (not verified), and select the USB in the firmware boot menu. Use the live session first: launching applications does not install the OS. Test Wi-Fi, audio, keyboard, display brightness, suspend, and external monitors before deciding to install.
+
+Open **Install Rilex** from Super+Space. Calamares offers language, time zone, keyboard, partitioning, user creation, hostname, and a summary. Automatic partitioning erases the selected disk; manual partitioning requires understanding the existing partition layout. With UEFI, preserve and mount an existing EFI System Partition at `/boot/efi` when retaining another OS. Read the summary and explicit confirmation before proceeding. Never select a disk whose contents you need to keep without a verified backup. Encryption is not validated and must not be relied upon in this development version.
+
+When installation finishes, reboot and remove the USB. Log in with the account and password you created. Confirm Wi-Fi and run `sudo apt update`. The installed desktop must not automatically log in to the live account. Installer logs are typically in the live user's `~/.cache/calamares/session.log`; also preserve `/var/log/Calamares.log` if present. If installation fails, keep logs before rebooting.
+
+The intended image supports amd64 UEFI and legacy BIOS. Support claims depend on the corresponding recorded VM boot tests; successful image creation alone does not establish either mode.
