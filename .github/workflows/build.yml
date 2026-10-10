@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 jobs:
   iso:
     runs-on: ubuntu-24.04
@@ -15,6 +17,12 @@ jobs:
             apt-get update &&
             apt-get install -y live-build debootstrap xorriso squashfs-tools dosfstools mtools dpkg-dev ca-certificates python3 rsync isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin &&
             ./build/build-iso.sh'
+      - name: Attest ISO and Rilex package provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            dist/rilex-0.1-amd64.iso
+            dist/rilex-defaults_0.1.0_all.deb
       - name: Keep candidate artifacts
         if: always()
         uses: actions/upload-artifact@v4
