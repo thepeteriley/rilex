@@ -73,3 +73,11 @@ signed Debian APT. Access binds to the launcher's loopback port 2223 using
 SSH setup is not part of the released operating system. Use QMP `type` for US
 keyboard input when no VNC client is available; text is literal and key events
 are paced.
+
+## Package ownership integration check
+
+The actual `rilex-defaults_0.1.0_all.deb` built in the amd64 Debian guest was compared against downloaded official Debian packages for Foot, Fuzzel, Waybar, Mako, Calamares settings, SDDM and the Breeze greeter theme. `tests/test-package-ownership.py` passed across all seven vendor packages: no shared files or symlinks. Shared directories are allowed.
+
+Foot, Fuzzel and Waybar vendor defaults are Debian conffiles; diverting those would impair Debian conffile upgrade semantics. Rilex instead ships distinct paths under `/etc/rilex`, and its launch wrappers honor user configurations before selecting these defaults. No diversion or `Replaces` declaration is used. The installer settings enter the live image as a live-build overlay and are not owned by the persistent defaults package.
+
+To repeat this check, download the vendor packages with signed APT in the disposable Debian build guest, build the Rilex package, then pass its path and the vendor `.deb` paths to `python3 tests/test-package-ownership.py`. This check proves absence of collisions for the supplied packages; it does not establish runtime desktop or installer functionality.
