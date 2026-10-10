@@ -26,8 +26,8 @@ while true; do
      pause ;;
   6) mkdir -p "$config/foot"; [ -f "$config/foot/foot.ini" ] || cp /etc/xdg/foot/foot.ini "$config/foot/foot.ini"; nano "$config/foot/foot.ini" ;;
   7) cat /etc/os-release; printf '\n'; uname -a; printf '\n'; hyprctl version; printf '\n'; free -h; pause ;;
-  8) file=$(find /usr/share/doc/rilex -maxdepth 1 -name '*.md' -printf '%f\n' | fzf --prompt='Documentation > ') || continue
-     [ -n "$file" ] && less "/usr/share/doc/rilex/$file" ;;
+  8) file=$(find /usr/share/doc/rilex-defaults -maxdepth 1 -name '*.md' -printf '%f\n' | fzf --prompt='Documentation > ') || continue
+     [ -n "$file" ] && less "/usr/share/doc/rilex-defaults/$file" ;;
   9) printf 'Install Debian software with sudo apt install PACKAGE.\nUse apt search NAME to discover packages.\nUse pipx for Python CLI applications and python3 -m venv for projects.\nDo not replace Debian-managed Python packages with sudo pip.\n\nOptional development tools: sudo apt install gfortran r-base valgrind\n'; pause ;;
   0) exit 0 ;;
  esac
