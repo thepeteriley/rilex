@@ -9,7 +9,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('socket')
 parser.add_argument('action', choices=['screenshot', 'key', 'click', 'status', 'quit', 'type'])
 parser.add_argument('values', nargs='*')
+parser.add_argument('--typing-delay', type=float, default=0.12)
+parser.add_argument('--key-hold', type=int, default=None)
+parser.add_argument('--click-delay', type=float, default=0.2)
 a = parser.parse_args()
+if a.key_hold is None: a.key_hold = 100 if a.action == "key" else 10
+if a.typing_delay < 0 or a.click_delay < 0 or not 1 <= a.key_hold <= 1000:
+    parser.error("Delays must be nonnegative and key hold must be 1..1000 ms.")
 s = socket.socket(socket.AF_UNIX)
 s.settimeout(10)
 s.connect(a.socket)
@@ -27,7 +33,7 @@ if a.action == 'screenshot':
     cmd('screendump', {'filename': path, 'format': 'png'})
     print(path)
 elif a.action == 'key':
-    result = cmd('human-monitor-command', {'command-line': 'sendkey '+a.values[0]})
+    result = cmd('human-monitor-command', {'command-line': 'sendkey '+a.values[0]+' '+str(a.key_hold)})
     if result: raise RuntimeError('HMP sendkey failed: '+result.strip())
 elif a.action == 'type':
     mapping = {' ': 'spc', '\n': 'ret', '-': 'minus', '_': 'shift-minus', '=': 'equal', '+': 'shift-equal', '/': 'slash', '?': 'shift-slash', '.': 'dot', '>': 'shift-dot', ',': 'comma', '<': 'shift-comma', ';': 'semicolon', ':': 'shift-semicolon', '\'': 'apostrophe', '"': 'shift-apostrophe', '[': 'bracket_left', ']': 'bracket_right', '{': 'shift-bracket_left', '}': 'shift-bracket_right', '\\': 'backslash', '|': 'shift-backslash', '`': 'grave_accent', '~': 'shift-grave_accent'}
@@ -37,15 +43,17 @@ elif a.action == 'type':
         if char.isascii() and char.isalnum(): key = ('shift-' if char.isupper() else '')+char.lower()
         elif char in mapping: key = mapping[char]
         else: raise ValueError('Unsupported US keyboard character: '+repr(char))
-        result = cmd('human-monitor-command', {'command-line': 'sendkey '+key+' 10'})
+        result = cmd('human-monitor-command', {'command-line': 'sendkey '+key+' '+str(a.key_hold)})
         if result: raise RuntimeError('HMP sendkey failed: '+result.strip())
-        time.sleep(0.12)
+        time.sleep(a.typing_delay)
 elif a.action == 'click':
     x, y, width, height = map(int, a.values)
     cmd('input-send-event', {'events': [
         {'type':'abs','data':{'axis':'x','value': int(x*32767/width)}},
-        {'type':'abs','data':{'axis':'y','value': int(y*32767/height)}},
-        {'type':'btn','data':{'button':'left','down':True}},
-        {'type':'btn','data':{'button':'left','down':False}}]})
+        {'type':'abs','data':{'axis':'y','value': int(y*32767/height)}}]})
+    time.sleep(a.click_delay)
+    cmd('input-send-event', {'events': [{'type':'btn','data':{'button':'left','down':True}}]})
+    time.sleep(a.click_delay)
+    cmd('input-send-event', {'events': [{'type':'btn','data':{'button':'left','down':False}}]})
 elif a.action == 'status': print(cmd('query-status'))
 elif a.action == 'quit': cmd('quit')
