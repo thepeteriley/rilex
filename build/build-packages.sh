@@ -23,6 +23,7 @@ cp "$ROOT/desktop/wallpapers/rilex.svg" "$STAGE/usr/share/rilex/wallpapers/"
 cp "$ROOT/desktop/themes/rilex-logo.svg" "$STAGE/usr/share/icons/hicolor/scalable/apps/rilex.svg"
 mkdir -p "$STAGE/usr/share/rilex"
 REVISION=${RILEX_SOURCE_REVISION:-$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || printf unknown)}
+[[ $REVISION =~ ^[0-9a-f]{40}$ ]] || { echo 'Set RILEX_SOURCE_REVISION to the exact 40-character source commit when building an exported tree.' >&2; exit 1; }
 printf 'NAME=Rilex\nVERSION=0.1\nSOURCE_REVISION=%s\n' "$REVISION" > "$STAGE/usr/share/rilex/build-info"
 printf '%s\n' "$REVISION" > "$ROOT/dist/source-revision.txt"
 cp -a "$ROOT/docs/." "$STAGE/usr/share/doc/rilex-defaults/"
