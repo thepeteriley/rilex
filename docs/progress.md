@@ -50,7 +50,7 @@ for initial desktop diagnosis; a compact current-source hosted build also runs.
 ## Real candidate evidence
 Hosted run [38076402014](https://github.com/thepeteriley/rilex/actions/runs/38076402014)
 built source 3d36fcd successfully. The downloaded archive digest and ISO checksum
-passed. The real compact ISO is `dist/rilex-0.1-amd64.iso`, 1,769,701,376 bytes,
+passed. That compact candidate was downloaded to `.cache/candidate-3d36`, 1,769,701,376 bytes,
 SHA-256 `bc362bf1779ea714736b7aaa140f54a504118588de713cb6c9982f11d997c800`.
 Its live filesystem, kernel/initramfs, BIOS and UEFI boot entries passed structural
 checks. It is a development candidate, not a verified release.
@@ -68,3 +68,20 @@ required Calamares branding slideshow (fafcc69), and live-build's regular
 `/etc/os-release` shadowing the package identity (b4bda6d). Patched live-session
 checks passed all 15 service assertions. Fuzzel appeared through Super+Space.
 These fixes require a fresh candidate; existing ISO files are diagnostic builds.
+
+Hosted corrected source e7fd8e4 built successfully in run
+[38077567221](https://github.com/thepeteriley/rilex/actions/runs/38077567221).
+Its artifact digest, ISO checksum and structural verification passed.
+`dist/rilex-0.1-amd64.iso` now holds this corrected diagnostic candidate:
+1,769,701,376 bytes, SHA-256
+`ec54e0092af724cc887e1f6f3b5bc683e01e594daaa0fbf57860550d1792ac04`.
+Container provenance recorded `unknown`; b252079 now passes the exact CI commit
+explicitly and rejects missing source provenance. An attestation-enabled build
+is running. Source e7fd8e4 is identifiable from the Actions run, but its embedded
+metadata defect excludes it from release qualification.
+
+The earlier diagnostic ISO installer reached reviewed summary/confirmation,
+created only the disposable vda partitions, and began unpackfs. Super+2 switched
+workspaces and Fuzzel successfully launched Foot. All 53 bindings were present
+in actual `hyprctl -j binds` output. Installation completion/independent reboot
+remain pending.
