@@ -27,7 +27,8 @@ if a.action == 'screenshot':
     cmd('screendump', {'filename': path, 'format': 'png'})
     print(path)
 elif a.action == 'key':
-    cmd('human-monitor-command', {'command-line': 'sendkey '+a.values[0]})
+    result = cmd('human-monitor-command', {'command-line': 'sendkey '+a.values[0]})
+    if result: raise RuntimeError('HMP sendkey failed: '+result.strip())
 elif a.action == 'type':
     mapping = {' ': 'spc', '\n': 'ret', '-': 'minus', '_': 'shift-minus', '=': 'equal', '+': 'shift-equal', '/': 'slash', '?': 'shift-slash', '.': 'dot', '>': 'shift-dot', ',': 'comma', '<': 'shift-comma', ';': 'semicolon', ':': 'shift-semicolon', '\'': 'apostrophe', '"': 'shift-apostrophe', '[': 'bracket_left', ']': 'bracket_right', '{': 'shift-bracket_left', '}': 'shift-bracket_right', '\\': 'backslash', '|': 'shift-backslash', '`': 'grave_accent', '~': 'shift-grave_accent'}
     mapping.update(dict(zip('!@#$%^&*()', ['shift-'+x for x in '1234567890'])))
@@ -36,7 +37,8 @@ elif a.action == 'type':
         if char.isascii() and char.isalnum(): key = ('shift-' if char.isupper() else '')+char.lower()
         elif char in mapping: key = mapping[char]
         else: raise ValueError('Unsupported US keyboard character: '+repr(char))
-        cmd('human-monitor-command', {'command-line': 'sendkey '+key})
+        result = cmd('human-monitor-command', {'command-line': 'sendkey '+key+' 10'})
+        if result: raise RuntimeError('HMP sendkey failed: '+result.strip())
         time.sleep(0.12)
 elif a.action == 'click':
     x, y, width, height = map(int, a.values)
