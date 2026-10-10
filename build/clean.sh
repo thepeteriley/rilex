@@ -6,6 +6,6 @@ WORK="$ROOT/.build/iso"
 if [[ -d $WORK ]]; then
  cd "$WORK"
  lb clean --purge
- # Only remove the generated configuration. Preserve downloaded package cache.
+ # Remove generated configuration after live-build purges build state.
  rm -rf -- config .build
 fi

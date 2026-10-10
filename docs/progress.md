@@ -6,6 +6,7 @@ Status: development, not a verified release.
 - macOS 27.0.1, ARM64, 8 CPUs, 24 GiB RAM, 1.3 TiB free.
 - Git and authenticated GitHub CLI available (thepeteriley).
 - No existing virtualization tools; installed Homebrew QEMU 11.1.2.
+- ARM hardware virtualization is available (`kern.hv_support=1`), but cannot accelerate x86 guests.
 - Host passwordless sudo unavailable; host privilege is unnecessary for QEMU TCG.
 - amd64 Linux will run with explicit QEMU software emulation, not ARM container execution.
 
@@ -26,7 +27,14 @@ Hyprland package indexed as 0.55.2+ds-1~bpo13+1 in official
 trixie-backports. Actual signed APT metadata and dependency solving remain to be checked.
 
 ## Build attempts
-Two real GitHub Actions candidate builds started; local emulated amd64 guest
-prerequisites installed. Reviewed and fixed Debian installer file ownership,
+Hosted candidate builds were superseded after integration review; the current
+build is tracked in GitHub Actions. Local emulated amd64 guest prerequisites
+installed, and its disposable root filesystem expanded to 79 GiB. Reviewed and fixed Debian installer file ownership,
 live-config SDDM session override, and invalid xorriso verifier command.
 Source static checks pass; no live desktop or installation pass is claimed.
+
+Package payload comparison passed against seven actual Debian packages (Foot,
+Fuzzel, Waybar, Mako, Calamares settings, SDDM, Breeze). Vendor conffiles are
+untouched; Rilex application wrappers select user configuration first, then
+`/etc/rilex` defaults. CI source checks passed. No runtime test is inferred
+from these static or package-ownership results.
