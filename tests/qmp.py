@@ -4,9 +4,10 @@ import argparse
 import json
 import pathlib
 import socket
+import time
 parser = argparse.ArgumentParser()
 parser.add_argument('socket')
-parser.add_argument('action', choices=['screenshot', 'key', 'click', 'status', 'quit'])
+parser.add_argument('action', choices=['screenshot', 'key', 'click', 'status', 'quit', 'type'])
 parser.add_argument('values', nargs='*')
 a = parser.parse_args()
 s = socket.socket(socket.AF_UNIX)
@@ -27,6 +28,16 @@ if a.action == 'screenshot':
     print(path)
 elif a.action == 'key':
     cmd('human-monitor-command', {'command-line': 'sendkey '+a.values[0]})
+elif a.action == 'type':
+    mapping = {' ': 'spc', '\n': 'ret', '-': 'minus', '_': 'shift-minus', '=': 'equal', '+': 'shift-equal', '/': 'slash', '?': 'shift-slash', '.': 'dot', '>': 'shift-dot', ',': 'comma', '<': 'shift-comma', ';': 'semicolon', ':': 'shift-semicolon', '\'': 'apostrophe', '"': 'shift-apostrophe', '[': 'bracket_left', ']': 'bracket_right', '{': 'shift-bracket_left', '}': 'shift-bracket_right', '\\': 'backslash', '|': 'shift-backslash', '`': 'grave_accent', '~': 'shift-grave_accent'}
+    mapping.update(dict(zip('!@#$%^&*()', ['shift-'+x for x in '1234567890'])))
+    value = ' '.join(a.values)
+    for char in value:
+        if char.isascii() and char.isalnum(): key = ('shift-' if char.isupper() else '')+char.lower()
+        elif char in mapping: key = mapping[char]
+        else: raise ValueError('Unsupported US keyboard character: '+repr(char))
+        cmd('human-monitor-command', {'command-line': 'sendkey '+key})
+        time.sleep(0.12)
 elif a.action == 'click':
     x, y, width, height = map(int, a.values)
     cmd('input-send-event', {'events': [
