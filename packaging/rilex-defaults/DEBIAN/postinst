@@ -9,6 +9,9 @@ if [ "$1" = configure ]; then
   chown sddm:sddm "$sddm_home/state.conf"
   chmod 0600 "$sddm_home/state.conf"
  fi
- systemctl enable NetworkManager.service bluetooth.service sddm.service 2>/dev/null || true
- systemctl set-default graphical.target 2>/dev/null || true
+ # Upgrades preserve administrator service and default-target choices.
+ if [ -z "${2:-}" ]; then
+  systemctl enable NetworkManager.service bluetooth.service sddm.service 2>/dev/null || true
+  systemctl set-default graphical.target 2>/dev/null || true
+ fi
 fi

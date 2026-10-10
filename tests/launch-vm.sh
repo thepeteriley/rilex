@@ -23,8 +23,10 @@ if [[ $MODE != bios ]]; then
   [[ -n "$vars" || ! -f "$candidate" ]] || vars=$candidate
  done
  [[ -f "$code" && -f "$vars" ]] || { echo 'Set OVMF_CODE and OVMF_VARS to matching UEFI firmware files.' >&2; exit 1; }
- [[ -f "$QA/vars.fd" ]] || cp "$vars" "$QA/vars.fd"
- args+=(-drive "if=pflash,format=raw,readonly=on,file=$code" -drive "if=pflash,format=raw,file=$QA/vars.fd")
+ nvram="$ROOT/.cache/qa-uefi/vars.fd"
+ mkdir -p "$(dirname -- "$nvram")"
+ [[ -f "$nvram" ]] || cp "$vars" "$nvram"
+ args+=(-drive "if=pflash,format=raw,readonly=on,file=$code" -drive "if=pflash,format=raw,file=$nvram")
 fi
 if [[ $MODE != installed ]]; then
  [[ -f "$ISO" && ! -L "$ISO" ]] || { echo 'ISO must be a regular file.' >&2; exit 1; }
