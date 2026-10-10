@@ -18,6 +18,11 @@ on:
         type: choice
         default: plain
         options: [plain, virgl]
+      diagnostic_shell:
+        description: Enable an ephemeral root debug shell for VM-only log collection
+        required: true
+        type: boolean
+        default: false
 permissions:
   contents: read
   actions: read
@@ -67,6 +72,7 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
           BOOT_MODE: ${{ inputs.boot_mode }}
           GRAPHICS: ${{ inputs.graphics }}
+          DIAGNOSTIC_SHELL: ${{ inputs.diagnostic_shell }}
         run: |
           mkdir -p .cache/boot-smoke
           evidence="$PWD/.cache/boot-smoke"
@@ -109,7 +115,19 @@ jobs:
           done
           python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-start.txt"
           sleep 10
-          python3 tests/qmp.py "$evidence/qmp.sock" key ret
+          if [ "$DIAGNOSTIC_SHELL" = true ]; then
+            # Edit only this VM boot invocation; the ISO remains unchanged.
+            python3 tests/qmp.py "$evidence/qmp.sock" key e
+            sleep 2
+            python3 tests/qmp.py "$evidence/qmp.sock" key ctrl-home
+            python3 tests/qmp.py "$evidence/qmp.sock" key down
+            python3 tests/qmp.py "$evidence/qmp.sock" key end
+            python3 tests/qmp.py "$evidence/qmp.sock" type ' systemd.debug_shell=1 console=ttyS0,115200'
+            python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/grub-debug-edit.png"
+            python3 tests/qmp.py "$evidence/qmp.sock" key f10
+          else
+            python3 tests/qmp.py "$evidence/qmp.sock" key ret
+          fi
           sleep 60
           if [ "$GRAPHICS" = virgl ]; then
             import -window root "$evidence/boot-60s.png"
@@ -134,6 +152,14 @@ jobs:
             fi
             python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-${elapsed}s.txt"
           done
+          if [ "$DIAGNOSTIC_SHELL" = true ]; then
+            python3 tests/qmp.py "$evidence/qmp.sock" key ctrl-alt-f9
+            sleep 5
+            python3 tests/qmp.py "$evidence/qmp.sock" type 'cat /proc/cmdline > /dev/ttyS0; journalctl -b -u sddm --no-pager > /dev/ttyS0; cat /etc/sddm.conf /etc/sddm.conf.d/*.conf > /dev/ttyS0; find /run/user -name hyprland.log -exec cat {} + > /dev/ttyS0'
+            python3 tests/qmp.py "$evidence/qmp.sock" key ret
+            sleep 10
+            python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/debug-shell.png"
+          fi
           python3 tests/qmp.py "$evidence/qmp.sock" quit
           wait "$qemu_pid"
           printf 'Evidence captured. Desktop and installation remain unverified pending inspection.\n' > "$evidence/result.txt"
