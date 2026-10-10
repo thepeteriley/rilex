@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 userconfig=${XDG_CONFIG_HOME:-"$HOME/.config"}/waybar
-config=/etc/rilex/waybar/config.jsonc
+config=/etc/rilex/waybar/config
 style=/etc/rilex/waybar/style.css
 if [ -f "$userconfig/config" ]; then config="$userconfig/config";
 elif [ -f "$userconfig/config.jsonc" ]; then config="$userconfig/config.jsonc"; fi
