@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-cat <<'KEYS' | fuzzel --dmenu --prompt='Search shortcuts > ' >/dev/null
+cat <<'KEYS' | rilex-launcher --dmenu --prompt='Search shortcuts > ' >/dev/null
 Super + Enter       Terminal
 Super + Space       Application launcher
 Super + Q           Close window

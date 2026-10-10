@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+config=${XDG_CONFIG_HOME:-"$HOME/.config"}/fuzzel/fuzzel.ini
+if [ ! -f "$config" ]; then config=/etc/rilex/fuzzel/fuzzel.ini; fi
+exec fuzzel --config="$config" "$@"

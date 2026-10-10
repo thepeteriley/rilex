@@ -24,7 +24,7 @@ while true; do
      printf 'GTK theme: 1 dark, 2 light, Enter unchanged\n'; read -r theme
      case "$theme" in 1) gsettings set org.gnome.desktop.interface color-scheme prefer-dark; gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark;; 2) gsettings set org.gnome.desktop.interface color-scheme default; gsettings set org.gnome.desktop.interface gtk-theme Adwaita;; esac
      pause ;;
-  6) mkdir -p "$config/foot"; [ -f "$config/foot/foot.ini" ] || cp /etc/xdg/foot/foot.ini "$config/foot/foot.ini"; nano "$config/foot/foot.ini" ;;
+  6) mkdir -p "$config/foot"; [ -f "$config/foot/foot.ini" ] || cp /etc/rilex/foot/foot.ini "$config/foot/foot.ini"; nano "$config/foot/foot.ini" ;;
   7) cat /etc/os-release; printf '\n'; uname -a; printf '\n'; hyprctl version; printf '\n'; free -h; pause ;;
   8) file=$(find /usr/share/doc/rilex-defaults -maxdepth 1 -name '*.md' -printf '%f\n' | fzf --prompt='Documentation > ') || continue
      [ -n "$file" ] && less "/usr/share/doc/rilex-defaults/$file" ;;

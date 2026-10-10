@@ -11,7 +11,7 @@ hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.
 
 Default monitors use preferred resolution and automatic scaling. Use `hyprctl monitors` to discover output names. Restart the session after changing environment settings; ordinary config changes can be reloaded with `hyprctl reload`. Errors appear in `hyprctl configerrors`.
 
-Copy `/etc/xdg/waybar`, `/etc/xdg/fuzzel`, `/etc/xdg/foot` or `/etc/xdg/mako` into `~/.config/` before editing their files. Restart the corresponding application after edits. Rilex Welcome offers wallpaper selection, GTK dark/light theme selection and terminal configuration. It saves the image path in `~/.config/rilex/wallpaper`.
+Copy `/etc/rilex/waybar`, `/etc/rilex/fuzzel`, `/etc/rilex/foot` or `/etc/xdg/mako` into `~/.config/` before editing their files. Rilex wrappers choose user configs first, then the Rilex defaults via each application’s explicit configuration argument. Debian’s vendor application defaults remain package-owned and unchanged. Restart the corresponding application after edits. Rilex Welcome offers wallpaper selection, GTK dark/light theme selection and terminal configuration. It saves the image path in `~/.config/rilex/wallpaper`.
 
 Audio device and microphone selection are available in `pavucontrol`; network configuration uses keyboard-friendly `nmtui`. Bluetooth configuration uses Blueman or `bluetoothctl`. Thunar handles removable media via UDisks. Screenshot region selection uses the pointer; terminal users can run `grim filename.png` for a whole-screen image.
 

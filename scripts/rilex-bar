@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+userconfig=${XDG_CONFIG_HOME:-"$HOME/.config"}/waybar
+config=/etc/rilex/waybar/config.jsonc
+style=/etc/rilex/waybar/style.css
+if [ -f "$userconfig/config" ]; then config="$userconfig/config";
+elif [ -f "$userconfig/config.jsonc" ]; then config="$userconfig/config.jsonc"; fi
+if [ -f "$userconfig/style.css" ]; then style="$userconfig/style.css"; fi
+exec waybar --config "$config" --style "$style" "$@"

@@ -8,7 +8,7 @@ fi
 if ! systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service; then
  logger -t rilex-session 'Could not start audio services; inspect systemctl --user status'
 fi
-waybar &
+rilex-bar &
 mako &
 rilex-wallpaper &
 /usr/libexec/polkit-mate-authentication-agent-1 &
@@ -17,6 +17,6 @@ wl-paste --type image --watch cliphist store &
 state=${XDG_STATE_HOME:-"$HOME/.local/state"}/rilex
 mkdir -p "$state"
 if [ ! -f "$state/welcome-seen" ]; then
- foot --title=Rilex-Welcome rilex-welcome &
+ rilex-terminal --title=Rilex-Welcome rilex-welcome &
 fi
 wait
