@@ -2,7 +2,7 @@
 
 ## Recorded results
 
-On the macOS development host, `python3 tests/test-installer.py` passes four static installer checks. These verify the configured installation sequence, live-only launcher guard, GRUB configuration, and absence of embedded installer passwords. These do not boot the image or validate Calamares installation. No ISO boot, installed-system boot, or hardware validation is established by these results. The release is not ready until the checklist below has recorded evidence.
+On the macOS development host, `python3 tests/test-installer.py` passes five static installer checks. These verify the configured installation sequence, live-only launcher guard, GRUB configuration, and absence of embedded installer passwords, and separation of installer overrides from Debian package ownership. These do not boot the image or validate Calamares installation. No ISO boot, installed-system boot, or hardware validation is established by these results. The release is not ready until the checklist below has recorded evidence.
 
 ## VM release gates
 
