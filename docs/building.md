@@ -8,10 +8,10 @@ The supported build target is Debian 13 amd64 with root privileges for live-buil
 sudo apt update
 sudo apt install live-build debootstrap xorriso squashfs-tools dosfstools mtools \
   dpkg-dev ca-certificates rsync isolinux syslinux-common \
-  grub-pc-bin grub-efi-amd64-bin python3
+  grub-pc-bin grub-efi-amd64-bin python3 git
 python3 tests/static-check.py
 python3 build/check-package-availability.py
-sudo ./build/build-iso.sh
+sudo env RILEX_SOURCE_REVISION="$(git rev-parse HEAD)" ./build/build-iso.sh
 ```
 
 Outputs are `dist/rilex-0.1-amd64.iso`, its adjacent `.sha256` checksum, the local defaults package, and `dist/build.log`. The root filesystem records exact installed package versions in `/usr/share/rilex/package-manifest.tsv`. `build/verify-iso.sh` checks structure and El Torito BIOS and UEFI entries. This does not establish that the desktop or installer works; the runtime gates in [testing.md](testing.md) remain mandatory before release.
@@ -20,8 +20,10 @@ To discard an incomplete build and regenerate configuration while retaining down
 
 ```sh
 sudo ./build/clean.sh
-sudo ./build/build-iso.sh
+sudo env RILEX_SOURCE_REVISION="$(git rev-parse HEAD)" ./build/build-iso.sh
 ```
+
+Every package must record a complete 40-character Git commit revision. For a source export without `.git`, preserve the originating commit and supply it explicitly as `RILEX_SOURCE_REVISION`; do not invent a revision. The container command passes the host checkout revision because Git is not installed inside the container.
 
 The script refuses to overwrite an existing build tree. Build trees and caches under `.build` and generated artifacts under `dist` are excluded from Git. Do not run the build from a source checkout whose path changes while the build is active.
 
@@ -30,7 +32,7 @@ The script refuses to overwrite an existing build tree. Build trees and caches u
 The manually triggered GitHub workflow uses this method. Docker must support privileged Linux containers.
 
 ```sh
-docker run --rm --privileged -v "$PWD:/src" -w /src debian:trixie bash -c '
+docker run --rm --privileged -e RILEX_SOURCE_REVISION="$(git rev-parse HEAD)" -v "$PWD:/src" -w /src debian:trixie bash -c '
   apt-get update &&
   apt-get install -y live-build debootstrap xorriso squashfs-tools dosfstools \
     mtools dpkg-dev ca-certificates python3 rsync isolinux syslinux-common \
@@ -53,7 +55,7 @@ qemu-system-x86_64 -machine q35 -accel tcg,thread=multi -smp 4 -m 8192 \
   -nic user,hostfwd=tcp:127.0.0.1:2222-:22 -nographic
 ```
 
-Provision this disposable build guest via its serial console or a Debian installer with your own SSH public key. Do not embed SSH keys or credentials in the Rilex payload. Ensure the guest filesystem has expanded with `lsblk` and `df -h`; Debian cloud-init can expand the root partition during initial boot. Install the prerequisites above inside the guest, copy the source checkout into `/root/rilex` using `rsync -e 'ssh -p 2222'`, and run `/root/rilex/build/build-iso.sh`. Copy `dist` artifacts back using `rsync` or `scp`. Port 2222 is bound only to the host's loopback address.
+Provision this disposable build guest via its serial console or a Debian installer with your own SSH public key. Do not embed SSH keys or credentials in the Rilex payload. Ensure the guest filesystem has expanded with `lsblk` and `df -h`; Debian cloud-init can expand the root partition during initial boot. Install the prerequisites above inside the guest, copy the source checkout into `/root/rilex` using `rsync -e 'ssh -p 2222'`, and run `RILEX_SOURCE_REVISION=COMMIT /root/rilex/build/build-iso.sh`, substituting the complete commit captured from the host checkout before copying. Copy `dist` artifacts back using `rsync` or `scp`. Port 2222 is bound only to the host's loopback address.
 
 Only QEMU-created qcow2 disks belong to this build and test process. Never pass through a physical disk. Runtime Hyprland tests need a virtio GPU with working EGL, or an explicitly tested software-rendering configuration; a serial-only build guest is sufficient for image assembly.
 
