@@ -24,7 +24,8 @@ Status: development, not a verified release.
 - [ ] Publish verified release and checksums; tag only after installation tests pass.
 
 Hyprland package indexed as 0.55.2+ds-1~bpo13+1 in official
-trixie-backports. Actual signed APT metadata and dependency solving remain to be checked.
+trixie-backports. Signed APT metadata was verified by debootstrap. Actual APT simulation resolved
+all pinned desktop packages from Stable and official backports.
 
 ## Build attempts
 Hosted candidate builds were superseded after integration review; the current
@@ -38,3 +39,10 @@ Fuzzel, Waybar, Mako, Calamares settings, SDDM, Breeze). Vendor conffiles are
 untouched; Rilex application wrappers select user configuration first, then
 `/etc/rilex` defaults. CI source checks passed. No runtime test is inferred
 from these static or package-ownership results.
+
+The local build rejected a changed local .deb after indexing (Hash Sum mismatch).
+The package index was regenerated with frozen inputs; APT refresh then passed.
+No hash/signature/TLS validation was disabled. Source 530981f is frozen for the
+resumed local candidate. The source recipe now selects lightweight Maui instead
+of Breeze to avoid importing Plasma. Hosted candidate d642a14 remains useful
+for initial desktop diagnosis; a compact current-source hosted build also runs.
