@@ -6,6 +6,18 @@ on:
         description: Successful Build candidate ISO workflow run ID in this repository
         required: true
         type: string
+      boot_mode:
+        description: Firmware boot mode (fresh disposable disk each run)
+        required: true
+        type: choice
+        default: uefi
+        options: [uefi, bios]
+      graphics:
+        description: Guest graphics accommodation
+        required: true
+        type: choice
+        default: plain
+        options: [plain, virgl]
 permissions:
   contents: read
   actions: read
@@ -36,7 +48,7 @@ jobs:
       - name: Install isolated VM and evidence tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf xvfb x11-utils mesa-utils libgl1-mesa-dri xorriso squashfs-tools lua5.4
+          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf xvfb x11-utils mesa-utils libgl1-mesa-dri xorriso squashfs-tools lua5.4 imagemagick
       - name: Verify source, checksum and ISO boot contents
         env:
           EXPECTED_SHA: ${{ steps.candidate.outputs.source_sha }}
@@ -53,6 +65,8 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           GALLIUM_DRIVER: llvmpipe
+          BOOT_MODE: ${{ inputs.boot_mode }}
+          GRAPHICS: ${{ inputs.graphics }}
         run: |
           mkdir -p .cache/boot-smoke
           evidence="$PWD/.cache/boot-smoke"
@@ -66,15 +80,21 @@ jobs:
           done
           glxinfo -B > "$evidence/host-gl.txt"
           qemu-img create -f qcow2 "$evidence/disposable.qcow2" 32G
-          cp /usr/share/OVMF/OVMF_VARS_4M.fd "$evidence/vars.fd"
+          firmware=()
+          if [ "$BOOT_MODE" = uefi ]; then
+            cp /usr/share/OVMF/OVMF_VARS_4M.fd "$evidence/vars.fd"
+            firmware=(-drive "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd"
+              -drive "if=pflash,format=raw,file=$evidence/vars.fd")
+          fi
+          graphics=(-device virtio-vga -display none)
+          if [ "$GRAPHICS" = virgl ]; then graphics=(-device virtio-vga-gl -display gtk,gl=on); fi
           accel=(-accel tcg,thread=multi -cpu max)
           if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then accel=(-accel kvm -cpu host); fi
           args=(-machine q35 -smp 2 -m 4096 "${accel[@]}"
-            -drive "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd"
-            -drive "if=pflash,format=raw,file=$evidence/vars.fd"
+            "${firmware[@]}"
             -drive "file=$evidence/disposable.qcow2,if=virtio,format=qcow2"
             -drive "file=$PWD/dist/rilex-0.1-amd64.iso,media=cdrom,readonly=on,format=raw"
-            -device virtio-vga-gl -display gtk,gl=on
+            "${graphics[@]}"
             -device qemu-xhci -device usb-tablet -nic user -boot d
             -serial "file:$evidence/serial.log"
             -qmp "unix:$evidence/qmp.sock,server=on,wait=off")
@@ -91,10 +111,18 @@ jobs:
           sleep 10
           python3 tests/qmp.py "$evidence/qmp.sock" key ret
           sleep 60
-          python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-60s.png"
+          if [ "$GRAPHICS" = virgl ]; then
+            import -window root "$evidence/boot-60s.png"
+          else
+            python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-60s.png"
+          fi
           python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-60s.txt"
           sleep 60
-          python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-120s.png"
+          if [ "$GRAPHICS" = virgl ]; then
+            import -window root "$evidence/boot-120s.png"
+          else
+            python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/boot-120s.png"
+          fi
           python3 tests/qmp.py "$evidence/qmp.sock" status > "$evidence/status-120s.txt"
           python3 tests/qmp.py "$evidence/qmp.sock" quit
           wait "$qemu_pid"
