@@ -5,7 +5,7 @@ ROOT=$(cd -- "$(dirname -- "$0")/.." && pwd)
 WORK="$ROOT/.build/iso"
 if [[ -d $WORK ]]; then
  cd "$WORK"
- lb clean --purge
- # Remove generated configuration after live-build purges build state.
+ lb clean --all
+ # Remove generated configuration after live-build resets build state; keep downloaded cache.
  rm -rf -- config .build
 fi
