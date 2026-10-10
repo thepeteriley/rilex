@@ -24,6 +24,8 @@ Super is the Windows/Command modifier. Press **Super + /** to search the shortcu
 | Super + C | Clipboard history |
 | Super + W | Rilex Welcome |
 
+Screen locking is disabled for the passwordless live account: the shortcut shows a notice. After installation it uses your created account password.
+
 Volume/microphone and brightness keys control PipeWire and display brightness. Super + left/right mouse drag moves/resizes windows. Clipboard history stores copied data in the user's cache, including potentially sensitive text; clear it with `cliphist wipe`.
 
 Defaults target Hyprland 0.55's Lua API, reviewed against the [v0.55 example](https://github.com/hyprwm/Hyprland/blob/v0.55.0/example/hyprland.lua) and [versioned dispatcher documentation](https://wiki.hypr.land/0.55.0/Configuring/Basics/Dispatchers/). Runtime validation is recorded in testing documentation; syntax review alone does not prove every binding functions.

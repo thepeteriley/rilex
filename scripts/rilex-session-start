@@ -1,8 +1,13 @@
 #!/bin/sh
 set -eu
 export XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland XDG_SESSION_TYPE=wayland
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE
-systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
+# SDDM establishes the session bus; retain the desktop if optional services fail.
+if ! dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE; then
+ logger -t rilex-session 'Could not import Wayland environment into D-Bus/systemd; portals may fail'
+fi
+if ! systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service; then
+ logger -t rilex-session 'Could not start audio services; inspect systemctl --user status'
+fi
 waybar &
 mako &
 rilex-wallpaper &
