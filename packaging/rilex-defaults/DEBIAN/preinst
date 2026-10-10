@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+# This is a regular vendor data file, not a Debian conffile. Preserve it across
+# base-files updates; the Debian-owned /etc/os-release symlink stays intact.
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+ dpkg-divert --package rilex-defaults --add --rename \
+  --divert /usr/lib/os-release.debian /usr/lib/os-release
+fi
