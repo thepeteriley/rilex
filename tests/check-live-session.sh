@@ -19,7 +19,7 @@ check portal systemctl --user is-active xdg-desktop-portal
 check hyprland-portal systemctl --user is-active xdg-desktop-portal-hyprland
 check bindings hyprctl binds
 check config-errors bash -c '[ -z "$(hyprctl configerrors)" ]'
-check installer command -v calamares-install-debian
+check installer command -v rilex-install
 check terminal command -v foot
 check launcher command -v fuzzel
 printf 'Failures: %s\n' "$failures"

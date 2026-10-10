@@ -19,3 +19,25 @@ Use QEMU on a Linux x86-64 machine, KVM when available, OVMF firmware for UEFI, 
 A functional installation test must also refresh signed Debian APT metadata successfully. Package signatures and TLS checks must remain enabled.
 
 Laptop-only validation includes suspend/resume, microphone routing, brightness, Bluetooth pairing, Wi-Fi firmware, USB mounting, external displays/HiDPI, and screen sharing. List each as unverified until tested on identifiable hardware. Do not advertise Secure Boot or encryption from static configuration alone.
+
+## Included disposable VM tools
+
+`tests/launch-vm.sh uefi` and `tests/launch-vm.sh bios` launch QEMU with a
+file-backed 32 GB test disk under `.cache`, VNC on localhost:5901, and QMP/serial
+logs under `.cache/qa-MODE`. They accept no physical disk argument. Stop one
+VM before starting another. `tests/launch-vm.sh installed` omits the ISO and
+reuses the installation test disk. On macOS the script locates Homebrew QEMU
+firmware; on Linux install OVMF, or supply a matching `OVMF_CODE`/`OVMF_VARS` pair.
+
+Capture evidence with:
+
+```sh
+python3 tests/qmp.py .cache/qa-uefi/qmp.sock screenshot .cache/qa-uefi/desktop.png
+python3 tests/qmp.py .cache/qa-uefi/qmp.sock key meta_l-ret
+python3 tests/qmp.py .cache/qa-uefi/qmp.sock status
+```
+
+These launch/control tools do not assert a passing desktop or installer test.
+Every interaction still needs observation and recorded results. VNC and
+forwarded SSH ports bind only to loopback; no credentials are included in the
+source or release payload.
