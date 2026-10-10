@@ -42,7 +42,7 @@ docker run --rm --privileged -v "$PWD:/src" -w /src debian:trixie bash -c '
 
 An ARM container does not natively execute this amd64 build. Use QEMU's x86-64 full-system emulation (TCG) and a Debian 13 amd64 guest. Hardware acceleration cannot accelerate an x86 guest on an ARM host. This is slower than building on conventional amd64 Linux.
 
-Install QEMU with `brew install qemu`. Download the amd64 Debian 13 nocloud qcow2 image from the official [Debian cloud image directory](https://cloud.debian.org/images/cloud/trixie/latest/), along with its signed checksum manifest. Verify the manifest against Debian's published cloud-image signing key and verify the image checksum; do not disable signature verification for convenience. Create a writable overlay and expand its virtual size:
+Install QEMU with `brew install qemu`. Download the amd64 Debian 13 nocloud qcow2 image from the official [Debian cloud image directory](https://cloud.debian.org/images/cloud/trixie/latest/), along with SHA512SUMS over HTTPS. The latest directory inspected on 2026-10-10 did not publish a detached manifest signature; this bootstrap image was checked against its HTTPS SHA-512 manifest, not a verified signing key. Debian package installs additionally require signed APT metadata. If stronger bootstrap provenance is required, use a Debian installer image with its published signed checksum manifest. Create a writable overlay and expand its virtual size:
 
 ```sh
 qemu-img create -f qcow2 -F qcow2 -b /absolute/path/debian-13-nocloud-amd64.qcow2 \
