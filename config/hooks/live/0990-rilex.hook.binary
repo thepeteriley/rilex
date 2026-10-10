@@ -1,0 +1,19 @@
+#!/bin/sh
+# live-build runs binary hooks inside its generated binary/ tree.
+set -eu
+if [ -f boot/grub/live-theme/theme.txt ]; then
+    sed -i '/^desktop-image:/d; s/^title-text:.*/title-text: "Rilex 0.1 (Debian 13) amd64"/' boot/grub/live-theme/theme.txt
+    printf '\ndesktop-color: "#20252c"\n' >> boot/grub/live-theme/theme.txt
+    # The generated config loads this path; live-build omitted the vendor font.
+    install -d boot/grub/fonts
+    install -m644 ../chroot/usr/share/grub/unicode.pf2 boot/grub/fonts/unicode.pf2
+fi
+for menu in boot/grub/grub.cfg boot/grub/loopback.cfg isolinux/live.cfg; do
+    [ ! -f "$menu" ] || sed -i 's/Live system/Rilex live system/g' "$menu"
+done
+if [ -f isolinux/stdmenu.cfg ]; then
+    sed -i '/^menu background /d' isolinux/stdmenu.cfg
+fi
+if [ -f isolinux/menu.cfg ]; then
+    sed -i 's/^menu title Boot menu.*/menu title Rilex 0.1 (Debian 13)/' isolinux/menu.cfg
+fi
