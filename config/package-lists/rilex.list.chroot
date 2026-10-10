@@ -36,7 +36,8 @@ xserver-xorg-core
 xserver-xorg-input-libinput
 mate-polkit
 sddm
-sddm-theme-breeze
+sddm-theme-maui
+libqt6svg6
 less
 libnotify-bin
 dconf-gsettings-backend
