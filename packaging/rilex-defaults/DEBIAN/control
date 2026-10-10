@@ -1,0 +1,11 @@
+Package: rilex-defaults
+Version: 0.1.0
+Architecture: all
+Maintainer: Rilex project <rilex@localhost>
+Section: metapackages
+Priority: optional
+Depends: bash, foot, fuzzel, waybar, mako-notifier, swaybg, sddm, network-manager, pipewire, wireplumber, xdg-desktop-portal-gtk, mate-polkit, python3
+Suggests: hyprland (>= 0.55.2), hyprlock, xdg-desktop-portal-hyprland
+Description: Rilex keyboard-oriented desktop defaults and welcome utility
+ Independently maintained configuration and original branding for the
+ Rilex Debian-based Hyprland desktop. Debian package repositories remain trusted.

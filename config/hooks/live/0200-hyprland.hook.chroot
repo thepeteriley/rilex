@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+# Backports are signed by the existing Debian archive keyring. Target selection
+# permits only dependencies required for this explicitly selected desktop stack.
+apt-get update
+apt-get -y -t trixie-backports install \
+ hyprland=0.55.2+ds-1~bpo13+1 \
+ hyprlock=0.9.6-1~bpo13+1 \
+ xdg-desktop-portal-hyprland=1.4.1-1~bpo13+1
+mkdir -p /usr/share/rilex
+LC_ALL=C dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' > /usr/share/rilex/package-manifest.tsv

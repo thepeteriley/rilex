@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+cat > /etc/os-release <<'RELEASE'
+PRETTY_NAME="Rilex 0.1 (Debian 13)"
+NAME="Rilex"
+VERSION_ID="0.1"
+VERSION="0.1 (Trixie)"
+VERSION_CODENAME=trixie
+ID=rilex
+ID_LIKE=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://www.debian.org/Bugs/"
+RELEASE
+printf 'Rilex 0.1 (Debian 13) \\n \\l\n' > /etc/issue
+printf 'Rilex: A Linux desktop built for people who prefer keyboards to mice.\nRun rilex-welcome for help. Based on Debian 13; an independent project.\n' > /etc/motd
+printf 'rilex\n' > /etc/hostname
+systemctl enable NetworkManager.service bluetooth.service sddm.service
+systemctl set-default graphical.target
+# No SSH server, authorized keys or reusable login credentials are installed.
+rm -f /etc/ssh/ssh_host_*
+# Generated on first boot, not shared between installations.
+truncate -s 0 /etc/machine-id
+rm -f /var/lib/dbus/machine-id
+ln -s /etc/machine-id /var/lib/dbus/machine-id

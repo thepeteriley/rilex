@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+if [ "$1" = configure ]; then
+ systemctl enable NetworkManager.service bluetooth.service sddm.service 2>/dev/null || true
+ systemctl set-default graphical.target 2>/dev/null || true
+fi
