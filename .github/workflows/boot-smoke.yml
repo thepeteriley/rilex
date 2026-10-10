@@ -157,10 +157,14 @@ jobs:
           if [ "$DIAGNOSTIC_SHELL" = true ]; then
             python3 tests/qmp.py "$evidence/qmp.sock" key ctrl-alt-f9
             sleep 5
-            python3 tests/qmp.py "$evidence/qmp.sock" type 'cat /proc/cmdline > /dev/ttyS0; journalctl -b -u sddm --no-pager > /dev/ttyS0; cat /etc/sddm.conf /etc/sddm.conf.d/*.conf > /dev/ttyS0; find /run/user -name hyprland.log -exec cat {} + > /dev/ttyS0'
+            python3 tests/qmp.py "$evidence/qmp.sock" type 'printf RILEX_DIAGNOSTIC_LOGS_BEGIN > /dev/ttyS0; cat /proc/cmdline > /dev/ttyS0; journalctl -b -u sddm --no-pager > /dev/ttyS0; cat /etc/sddm.conf /etc/sddm.conf.d/*.conf > /dev/ttyS0; find /run/user -name hyprland.log -exec cat {} + > /dev/ttyS0'
             python3 tests/qmp.py "$evidence/qmp.sock" key ret
             sleep 10
             python3 tests/qmp.py "$evidence/qmp.sock" screenshot "$evidence/debug-shell.png"
+            grep -F RILEX_DIAGNOSTIC_LOGS_BEGIN "$evidence/serial.log" >/dev/null || {
+              echo 'Guest debug commands did not reach the root shell; inspect screenshots.' >&2
+              exit 1
+            }
           fi
           python3 tests/qmp.py "$evidence/qmp.sock" quit
           wait "$qemu_pid"
