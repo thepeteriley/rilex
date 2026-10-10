@@ -25,7 +25,7 @@ lb config --mode debian --distribution trixie --architecture amd64 \
  --firmware-chroot true --firmware-binary true \
  --checksums sha256 --iso-volume RILEX_0_1 --iso-application Rilex \
  --iso-publisher 'Rilex project; unofficial Debian derivative' \
- --bootappend-live 'boot=live components hostname=rilex username=live locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC' \
+ --bootappend-live 'boot=live components hostname=rilex username=live user-fullname=Rilex locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC' \
  --chroot-squashfs-compression-type zstd
 rsync -a "$ROOT/config/" config/
 # Installer integration overlays Debian Calamares settings only in the live image,
