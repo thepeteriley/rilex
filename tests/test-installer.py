@@ -36,6 +36,11 @@ class InstallerConfiguration(unittest.TestCase):
         self.assertIn('userSwapChoices:', s)
         self.assertIn('initialPartitioningChoice: none', s)
         self.assertIn('defaultFileSystemType:  "ext4"', s)
+    def test_branding_requires_slideshow(self):
+        s = (BASE / 'branding/rilex/branding.desc').read_text()
+        self.assertIn('slideshow: show.qml', s)
+        self.assertIn('slideshowAPI: 2', s)
+        self.assertTrue((BASE / 'branding/rilex/show.qml').is_file())
     def test_no_credentials(self):
         for f in (ROOT / 'installer/rootfs').rglob('*'):
             if f.is_file():
