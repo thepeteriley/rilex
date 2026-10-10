@@ -28,6 +28,9 @@ lb config --mode debian --distribution trixie --architecture amd64 \
  --bootappend-live 'boot=live components hostname=rilex username=live locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC' \
  --chroot-squashfs-compression-type zstd
 rsync -a "$ROOT/config/" config/
+# Installer integration overlays Debian Calamares settings only in the live image,
+# avoiding conflicting file ownership in the persistent defaults package.
+rsync -a "$ROOT/installer/rootfs/" config/includes.chroot/
 mkdir -p config/packages.chroot
 cp "$ROOT/dist/rilex-defaults_0.1.0_all.deb" config/packages.chroot/
 lb build 2>&1 | tee "$ROOT/dist/build.log"

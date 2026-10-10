@@ -6,7 +6,7 @@ command -v dpkg-deb >/dev/null || { echo 'dpkg-deb is required.' >&2; exit 1; }
 rm -rf -- "$STAGE"
 mkdir -p "$STAGE/DEBIAN" "$STAGE/usr/bin" "$STAGE/usr/share/doc/rilex-defaults" "$ROOT/dist"
 cp "$ROOT/packaging/rilex-defaults/DEBIAN/"* "$STAGE/DEBIAN/"
-for tree in desktop/rootfs installer/rootfs; do
+for tree in desktop/rootfs; do
  [[ ! -d "$ROOT/$tree" ]] || cp -a "$ROOT/$tree/." "$STAGE/"
 done
 for script in "$ROOT"/scripts/rilex-*; do

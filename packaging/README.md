@@ -1,8 +1,8 @@
 # Rilex packages
 
-`build/build-packages.sh` builds `dist/rilex-defaults_0.1.0_all.deb` with Debian's `dpkg-deb`. It contains desktop defaults, original artwork, welcome helpers, documentation and Calamares settings. Files under `/etc` are Debian conffiles, preserving administrator edits on upgrade; per-user settings belong under `$XDG_CONFIG_HOME`.
+`build/build-packages.sh` builds `dist/rilex-defaults_0.1.0_all.deb` with Debian's `dpkg-deb`. It contains desktop defaults, original artwork, welcome helpers, and documentation. Files under `/etc` are Debian conffiles, preserving administrator edits on upgrade; per-user settings belong under `$XDG_CONFIG_HOME`.
 
-The package is generated from the tracked `desktop`, `scripts`, `installer` and `docs` source trees. The live-build overlay (password locking and live autologin) is deliberately not in this package. Calamares removes its live autologin configuration and installer launchers from the installed target.
+The package is generated from the tracked `desktop`, `scripts` and `docs` source trees. The live-build overlay (Calamares settings, password locking and live autologin) is deliberately not in this package. Calamares removes its live autologin configuration and installer launchers from the installed target.
 
 Hyprland is not custom compiled: the compositor, portal and locker are pinned official Debian trixie-backports packages in `config/hooks/live/0200-hyprland.hook.chroot`. APT validates Debian archive signatures and the package hashes covered by those signatures. Their Debian package copyright and source information remain installed. No testing or unstable suite is configured. Backports dependencies are resolved by APT using the explicit backports target for that transaction; the base kernel remains stable.
 
