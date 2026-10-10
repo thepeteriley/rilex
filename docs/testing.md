@@ -2,7 +2,29 @@
 
 ## Recorded results
 
-On the macOS development host, `python3 tests/test-installer.py` passes six static installer checks. These verify the configured installation sequence, live-only launcher guard, GRUB configuration, and absence of embedded installer passwords, and separation of installer overrides from Debian package ownership. These do not boot the image or validate Calamares installation. No ISO boot, installed-system boot, or hardware validation is established by these results. The release is not ready until the checklist below has recorded evidence.
+Source checks pass seven installer assertions, 53 expanded Lua bindings, shell
+syntax, SVG XML and Waybar JSON parsing. These are static checks.
+
+Actual hosted builds produced hybrid ISOs from d642a14 and 3d36fcd. Downloaded
+artifact digests, ISO SHA-256 and filesystem/kernel/initramfs/BIOS/UEFI structure
+passed. The compact 3d36fcd image is 1,769,701,376 bytes and has checksum
+`bc362bf1779ea714736b7aaa140f54a504118588de713cb6c9982f11d997c800`.
+It remains a development candidate with known runtime defects fixed in later source.
+
+The d642a14 ISO actually booted UEFI under QEMU11.1.2 TCG on macOS ARM64 with
+plain virtio-vga. Hyprland0.55.2 initialized through Mesa kms_swrast; XWayland
+fell back to software rendering. Rilex wallpaper/welcome appeared, Super+Enter
+opened Foot, and Super+Space opened Fuzzel. No special GPU environment flags
+were needed for this observed boot. All 15 live service checks passed after
+correcting the Waybar launcher path in the disposable live overlay. This is
+patched-session evidence, not an unmodified ISO pass. Missing Bluetooth,
+backlight and battery devices are expected in this VM.
+
+Actual Calamares launch exposed a missing required branding slideshow field.
+The launcher exited before displaying its window; later source supplies an
+original slideshow. Installation and independent reboot are still being tested.
+Evidence is saved under ignored `.cache/qa-uefi`, including screenshots,
+`live-checks-initial.txt`, and installer diagnostics. No release is qualified.
 
 ## VM release gates
 

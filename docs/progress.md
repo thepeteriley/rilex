@@ -62,3 +62,9 @@ Waybar, portals, application launching and installation remain under investigati
 This runtime evidence belongs to the earlier candidate, not the compact ISO.
 The upstream session watchdog invocation was corrected after seeing its warning.
 No independent installed-system boot has yet passed; no release/tag exists.
+
+Runtime investigation found and fixed the Waybar default path mismatch (3363b9b),
+required Calamares branding slideshow (fafcc69), and live-build's regular
+`/etc/os-release` shadowing the package identity (b4bda6d). Patched live-session
+checks passed all 15 service assertions. Fuzzel appeared through Super+Space.
+These fixes require a fresh candidate; existing ISO files are diagnostic builds.
