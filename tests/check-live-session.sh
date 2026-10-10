@@ -7,6 +7,8 @@ check() {
   shift
   if "$@"; then printf 'PASS %s\n' "$label"; else printf 'FAIL %s\n' "$label"; failures=$((failures+1)); fi
 }
+check release-identity grep -qx ID=rilex /etc/os-release
+check release-link test "$(readlink /etc/os-release)" = ../usr/lib/os-release
 check live-medium test -f /run/live/medium/live/filesystem.squashfs
 check hyprland hyprctl version
 check hyprland-monitors hyprctl monitors

@@ -1,6 +1,8 @@
 #!/bin/bash
 # Run inside the installed guest AFTER ejecting the ISO and independently booting.
 set -euo pipefail
+grep -qx ID=rilex /etc/os-release
+[ "$(readlink /etc/os-release)" = ../usr/lib/os-release ]
 [ ! -d /run/live/medium ]
 [ -s /boot/grub/grub.cfg ]
 findmnt /
