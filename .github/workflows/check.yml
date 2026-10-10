@@ -1,0 +1,13 @@
+name: Source checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install validation tools
+        run: sudo apt-get update && sudo apt-get install -y shellcheck python3-yaml
+      - name: Validate source
+        run: python3 tests/static-check.py

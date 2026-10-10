@@ -1,0 +1,24 @@
+name: Build candidate ISO
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build in privileged Debian Trixie container
+        run: |
+          docker run --rm --privileged -v "$PWD:/src" -w /src debian:trixie bash -c '
+            apt-get update &&
+            apt-get install -y live-build debootstrap xorriso squashfs-tools dosfstools mtools dpkg-dev ca-certificates python3 rsync isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin &&
+            ./build/build-iso.sh'
+      - name: Keep candidate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rilex-candidate
+          path: dist/
+          if-no-files-found: warn

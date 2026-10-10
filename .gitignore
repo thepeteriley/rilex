@@ -1,0 +1,14 @@
+.cache/
+.work/
+dist/
+*.iso
+*.qcow2
+*.raw
+*.img
+*.deb
+*.log
+__pycache__/
+.env
+*.key
+
+.build/
