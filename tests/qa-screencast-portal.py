@@ -8,12 +8,16 @@ The user must approve the actual provider's source-selection dialog.
 import argparse
 import json
 import os
+import re
+import subprocess
 import sys
 import uuid
 from gi.repository import Gio, GLib
 
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--timeout', type=int, default=180)
+p.add_argument('--sample-frames', action='store_true',
+               help='Require five actual video buffers through QA-only GStreamer')
 a = p.parse_args()
 bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
 service = 'org.freedesktop.portal.Desktop'
@@ -93,6 +97,25 @@ try:
     info = os.fstat(remote_fd)
     log('pipewire_remote', fd_open=True, fd_mode=info.st_mode, streams=streams)
     log('RILEX_SCREENCAST_HANDSHAKE_PASS', sampled_video_frames=False)
+    if a.sample_frames:
+        inspect = subprocess.run(['gst-inspect-1.0', 'pipewiresrc'],
+                                 text=True, capture_output=True, check=True)
+        print(inspect.stdout, flush=True)
+        if not all(re.search(r'^\s*' + prop + r'\s*:', inspect.stdout, re.M)
+                   for prop in ('fd', 'path', 'num-buffers')):
+            raise RuntimeError('Installed pipewiresrc lacks required fd/path/num-buffers properties')
+        pipeline = ['gst-launch-1.0', '-v', 'pipewiresrc', f'fd={remote_fd}',
+                    f'path={streams[0][0]}', 'num-buffers=5', '!',
+                    'fakesink', 'sync=false', 'silent=false']
+        capture = subprocess.run(pipeline, pass_fds=(remote_fd,), text=True,
+                                 capture_output=True, timeout=a.timeout)
+        print(capture.stdout, flush=True)
+        print(capture.stderr, file=sys.stderr, flush=True)
+        buffers = len(re.findall(r'last-message = chain', capture.stdout))
+        if capture.returncode != 0 or buffers < 5 or 'Got EOS' not in capture.stdout:
+            raise RuntimeError(f'GStreamer did not prove five buffers: exit={capture.returncode}, buffers={buffers}')
+        log('RILEX_SCREENCAST_FRAMES_PASS', received_buffers=buffers,
+            browser_screen_sharing_tested=False)
 except Exception as error:
     log('failure', error=str(error))
     sys.exit(1)

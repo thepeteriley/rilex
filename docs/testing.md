@@ -228,3 +228,11 @@ actual source-selection dialog must be approved. This proves a portal handshake
 only, not captured video frames or a browser application's screen sharing.
 Both scripts require Debian's python3-gi and time out after180seconds; they are
 QA tools and are not included in the desktop image.
+
+The ScreenCast client optionally accepts `--sample-frames` after installing
+QA-only `gstreamer1.0-tools` and `gstreamer1.0-pipewire` through signed APT.
+It records the installed `gst-inspect-1.0 pipewiresrc` properties, passes the
+authorized portal FD into the child without closing the portal session, and
+requires five actual fakesink buffer messages plus EOS and successful pipeline
+completion. A handshake success remains distinct from this buffer check and
+from application-specific browser sharing.
