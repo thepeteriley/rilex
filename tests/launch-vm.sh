@@ -13,7 +13,7 @@ DISK="$ROOT/.cache/qa-install.qcow2"
 if [[ ! -e "$DISK" ]]; then qemu-img create -f qcow2 "$DISK" 32G; fi
 [[ -f "$DISK" && ! -L "$DISK" ]] || { echo 'Refusing non-regular test disk.' >&2; exit 1; }
 args=(-machine q35 -smp 2 -m 4096 -drive "file=$DISK,if=virtio,format=qcow2" -device virtio-vga -device qemu-xhci -device usb-tablet -nic user,hostfwd=tcp:127.0.0.1:2223-:22 -display none -vnc 127.0.0.1:1 -serial "file:$QA/serial.log" -qmp "unix:$QA/qmp.sock,server=on,wait=off")
-if [[ $(uname -s) == Linux && -r /dev/kvm ]]; then args+=(-accel kvm -cpu host); else args+=(-accel tcg,thread=multi -cpu max); fi
+if [[ $(uname -s) == Linux && -r /dev/kvm ]]; then args+=(-accel kvm -cpu host); else args+=(-accel tcg,thread=multi -cpu "${RILEX_QA_TCG_CPU:-qemu64}"); fi
 if [[ $MODE != bios ]]; then
  code=${OVMF_CODE:-}; vars=${OVMF_VARS:-}
  for candidate in /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd /opt/homebrew/share/qemu/edk2-x86_64-code.fd; do

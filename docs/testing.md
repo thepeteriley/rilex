@@ -126,7 +126,7 @@ The optional `diagnostic_shell` input edits only the selected disposable VM's GR
 
 Diagnostic run [38079097210](https://github.com/thepeteriley/rilex/actions/runs/38079097210) booted the compact candidate from source `3d36fcd0c799253f30e643e9b5f72022cd2f5e74`. Its actual SDDM journal shows successful autologin for `live`, the correct Rilex session and a started session, followed by helper exit 11. The kernel reports a segmentation fault in `llvmpipe-0` at an AVX2 gather instruction. The login greeter shown afterwards was the result of that session crash, rather than failed authentication. The guest debug console and kernel options were visually verified, and the journal was collected through the serial device.
 
-The workflow now offers a `qemu64` TCG CPU baseline as a diagnostic accommodation, alongside `max`; KVM still uses `host`. This avoids exposing the same optional vector instruction set to guest LLVM, but its success must be verified by actual boot evidence. It changes neither the ISO nor the installed desktop's rendering configuration. The root cause is not yet narrowed to a particular Mesa, LLVM or QEMU implementation defect. The older failed evidence must not be counted as a working desktop test.
+The workflow now offers a `qemu64` TCG CPU baseline as a diagnostic accommodation, alongside `max`; KVM still uses `host`. A subsequent real UEFI test verified this accommodation with the newer candidate, as recorded below. It avoids exposing the same optional vector instruction set to guest LLVM. It changes neither the ISO nor the installed desktop's rendering configuration. The root cause is not yet narrowed to a particular Mesa, LLVM or QEMU implementation defect. The older failed evidence must not be counted as a working desktop test.
 
 For slow TCG guests whose HMP key-release timers produce repeated or stuck
 keys, `tests/qmp.py --explicit-key-events SOCKET key meta_l-spc` sends explicit
@@ -134,3 +134,8 @@ press/release events together. Its `type` action supports the same option with
 `--typing-delay 1` for paced text. This path actually opened Fuzzel, filtered
 Foot and launched it in the corrected e7fd8e4 live session on macOS QEMU 11.
 It is a QA input accommodation, not a desktop keyboard configuration change.
+
+
+Diagnostic run [38145364789](https://github.com/thepeteriley/rilex/actions/runs/38145364789) tested candidate build [38078483245](https://github.com/thepeteriley/rilex/actions/runs/38078483245), source `b252079d4f23cbccbc7b0fe9593e21627a15f788`, with plain virtio-vga and the `qemu64` TCG CPU. The inspected 300-second screenshot shows the Rilex Waybar, Foot Welcome and original wallpaper in a running Hyprland desktop. Actual guest logs show successful Rilex autologin, `start-hyprland` and Mesa 25.0.7 / llvmpipe LLVM 19.1.7 (128-bit) initialization, without the previous segmentation fault. The required guest diagnostic marker was received. This verifies live UEFI desktop startup for that candidate and environment; it does not verify installation or the final release image.
+
+`tests/launch-vm.sh` now defaults software emulation to the verified `qemu64` baseline. Set `RILEX_QA_TCG_CPU=max` to compare with a newer emulator if needed. KVM continues to use the host CPU. This is a VM testing accommodation and does not change distribution packages or installed-system settings.
