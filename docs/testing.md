@@ -139,3 +139,15 @@ It is a QA input accommodation, not a desktop keyboard configuration change.
 Diagnostic run [38145364789](https://github.com/thepeteriley/rilex/actions/runs/38145364789) tested candidate build [38078483245](https://github.com/thepeteriley/rilex/actions/runs/38078483245), source `b252079d4f23cbccbc7b0fe9593e21627a15f788`, with plain virtio-vga and the `qemu64` TCG CPU. The inspected 300-second screenshot shows the Rilex Waybar, Foot Welcome and original wallpaper in a running Hyprland desktop. Actual guest logs show successful Rilex autologin, `start-hyprland` and Mesa 25.0.7 / llvmpipe LLVM 19.1.7 (128-bit) initialization, without the previous segmentation fault. The required guest diagnostic marker was received. This verifies live UEFI desktop startup for that candidate and environment; it does not verify installation or the final release image.
 
 `tests/launch-vm.sh` now defaults software emulation to the verified `qemu64` baseline. Set `RILEX_QA_TCG_CPU=max` to compare with a newer emulator if needed. KVM continues to use the host CPU. This is a VM testing accommodation and does not change distribution packages or installed-system settings.
+
+For staged Calamares GUI QA after the disposable VM's QA-only SSH bootstrap,
+`tests/calamares-gui-input.py --port PORT --key KEY --known-hosts HOSTS ACTION`
+can clear stuck modifiers, advance a reviewed page (`next`), select the erase
+radio (`erase-selection`), or fill an independently generated private test
+account (`account --credentials FILE`). The credential JSON must be mode0600
+with name, username, hostname and password fields. Install QA-only `xdotool`
+through signed APT in the live overlay first. The helper requires fullscreen
+1280x800 English Calamares and checks QEMU, live media, exactly one disk and its
+32GiB size before acting. Capture and review each wizard page using `qmp.py`;
+inspect the summary and personally accept the disposable-disk confirmation.
+The helper does not launch an unattended partition operation.

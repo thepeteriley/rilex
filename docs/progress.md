@@ -129,3 +129,18 @@ was `$HOME/Screenshots` instead of the documented Pictures folder. The session
 now runs Debian's installed `xdg-user-dirs-update`, preserving existing choices.
 Running that real tool in the guest created Pictures successfully. This fix
 requires the next final-image boot to verify its automatic invocation.
+
+The older diagnostic installation booted its own virtual disk with every
+CD-ROM drive detached. SDDM required the newly created normal user's password;
+login reached Hyprland and Rilex Welcome. That user successfully ran
+`sudo apt-get update`: all four official Debian channels refreshed and
+`APT_EXIT:0` was captured. Screenshots and boot command are in
+`.cache/qa-installed-old`. Its immutable older image still contains the known
+Waybar launch defect and is not the release candidate. The initial SDDM session
+seed now uses its full desktop-file path, following observed fallback behavior.
+
+A staged GUI QA input helper uses guest XTEST timing, verifies QEMU, mounted
+live media and exactly one 32 GiB `/dev/vda`, and sends private QA credentials
+over SSH stdin. It deliberately leaves screenshots, summary review and the
+final destructive confirmation to the QA operator. Python compilation and
+all seven installer static assertions pass; final-image runtime remains open.
