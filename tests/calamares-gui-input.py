@@ -27,7 +27,7 @@ ssh = ['ssh', '-o', 'BatchMode=yes', '-o', f'UserKnownHostsFile={a.known_hosts}'
 # Check the actual guest before any GUI action. The only disk must be our
 # explicit 32 GiB virtual device; mounted live media is mandatory.
 guard = r'''set -eu
-case "$(cat /sys/class/dmi/id/product_name)" in *QEMU*|*KVM*) ;; *) exit 80;; esac
+case "$(cat /sys/class/dmi/id/product_name) $(cat /sys/class/dmi/id/sys_vendor)" in *QEMU*|*KVM*) ;; *) exit 80;; esac
 findmnt -rn /run/live/medium >/dev/null
 [ "$(lsblk -dn -o NAME,TYPE | awk '$2=="disk" {print $1}')" = vda ]
 [ "$(blockdev --getsize64 /dev/vda)" = 34359738368 ]
