@@ -205,10 +205,10 @@ held the sole QMP connection open during screenshot capture; that QA bug was
 fixed. Neither outcome qualifies the newer GUI-utils candidate until its own
 run38156156216 completes and its actual evidence is inspected.
 
-Latest GUI-utils candidate5efe987 passed native installation QA38156156216.
+Latest GUI-utils candidate 5efe987 passed native installation QA 38156156216.
 The artifact was downloaded and independently inspected: exact candidate and
-controller provenance, all17 live assertions, all38 successful Calamares jobs,
-actual destructive GUI confirmation on only the disposable32GiB `vda`, disk-only
+controller provenance, all 17 live assertions, all 38 successful Calamares jobs,
+actual destructive GUI confirmation on only the disposable 32 GiB `vda`, disk-only
 UEFI boot with no CD in command or QMP inventory, password-protected normal-user
 SDDM login, visible Hyprland/Waybar/Foot, active networking/audio/portal and
 successful signed APT refresh. The strict installed guest success marker is in

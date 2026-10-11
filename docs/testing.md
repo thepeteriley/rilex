@@ -4,25 +4,25 @@
 
 The final candidate source is
 `5efe9878386ae51e884ad391ea0045e19a519c66`. Its real hybrid ISO was produced by
-[build38148757735](https://github.com/thepeteriley/rilex/actions/runs/38148757735).
-[Native installation QA38156156216](https://github.com/thepeteriley/rilex/actions/runs/38156156216)
+[build 38148757735](https://github.com/thepeteriley/rilex/actions/runs/38148757735).
+[Native installation QA 38156156216](https://github.com/thepeteriley/rilex/actions/runs/38156156216)
 passed and its raw evidence was independently inspected on 2026-10-11:
 
 | Check | Actual result |
 |---|---|
 | Source, checksum and ISO boot contents | Passed |
 | UEFI live Hyprland desktop | Passed; actual screenshot |
-| Live services, portals, identity and config errors | All17 assertions passed |
-| Calamares automatic installation | All38 jobs completed successfully |
-| Destructive confirmation | Actual GUI modal captured; disposable32GiB `vda` only |
+| Live services, portals, identity and config errors | All 17 assertions passed |
+| Calamares automatic installation | All 38 jobs completed successfully |
+| Destructive confirmation | Actual GUI modal captured; disposable 32 GiB `vda` only |
 | Independent installed boot | Passed; no ISO or QA seed attached |
 | Normal created-user login | Password-protected SDDM; Rilex(Hyprland) session |
 | Hyprland, Waybar and Foot after installation | Running and visible in screenshot |
 | Installed networking, audio and portal | Active services verified |
 | Normal signed Debian APT refresh | Passed for stable, security, updates and backports |
 
-The native VM used Ubuntu24.04, QEMU/TCG `qemu64`, OVMF UEFI firmware, plain
-virtio-vga,4GiB RAM and a fresh file-backed32GiB qcow2 disk. Actual screenshots,
+The native VM used Ubuntu 24.04, QEMU/TCG `qemu64`, OVMF UEFI firmware, plain
+virtio-vga, 4 GiB RAM and a fresh file-backed 32 GiB qcow2 disk. Actual screenshots,
 Calamares logs, serial output and media inventory are in the workflow artifact
 and locally in ignored `.cache/qa-native-install-38156156216`. Both recorded
 candidate and controller revisions are the exact source above. The installed
@@ -30,7 +30,7 @@ serial log contains the strict `RILEX_INSTALLED_QA_PASS` marker after the
 successful APT output; a process exit code alone was not accepted as proof.
 No passwords, private keys or test disks are included in the evidence artifact.
 
-Static checks pass seven installer assertions,53 expanded Lua bindings, shell
+Static checks pass seven installer assertions, 53 expanded Lua bindings, shell
 syntax, SVG XML and Waybar JSON parsing. Actual keyboard/app interaction and
 BIOS live-boot evidence are recorded separately in the progress log. Installed
 BIOS boot, manual partitioning/ESP reuse, encryption, Secure Boot and laptop
@@ -40,7 +40,7 @@ physical hardware support.
 
 Earlier development images exposed real Waybar, branding and QA-controller
 failures, all corrected. Their patched sessions do not qualify this final ISO.
-The older feaca7002 image separately passed native installation QA38148591896;
+The older feaca7002 image separately passed native installation QA 38148591896;
 it is retained as historical evidence rather than substituted for the final run.
 
 ## VM release gates
