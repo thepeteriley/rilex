@@ -1,0 +1,157 @@
+name: Native disposable GUI installation QA
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful candidate build run ID in this repository
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Resolve verified candidate source
+        id: candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > candidate-run.json
+          jq -e '.conclusion == "success" and .path == ".github/workflows/build.yml"' candidate-run.json
+          printf 'source_sha=%s\n' "$(jq -r .head_sha candidate-run.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          path: controller
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.candidate.outputs.source_sha }}
+          path: candidate
+      - uses: actions/download-artifact@v4
+        with:
+          name: rilex-candidate
+          path: candidate/dist
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+      - name: Install VM and verification tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf xorriso squashfs-tools lua5.4 openssh-client
+      - name: Validate actual source and image
+        env:
+          EXPECTED_SHA: ${{ steps.candidate.outputs.source_sha }}
+        run: |
+          test "$(git -C candidate rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 candidate/tests/static-check.py
+          test -f candidate/dist/rilex-0.1-amd64.iso
+          test ! -L candidate/dist/rilex-0.1-amd64.iso
+          test "$(wc -l < candidate/dist/rilex-0.1-amd64.iso.sha256)" -eq 1
+          awk '$1 ~ /^[0-9a-f]+$/ && length($1) == 64 && $2 == "rilex-0.1-amd64.iso" {ok=1} END {exit !ok}' candidate/dist/rilex-0.1-amd64.iso.sha256
+          (cd candidate/dist && sha256sum --check rilex-0.1-amd64.iso.sha256)
+          candidate/build/verify-iso.sh candidate/dist/rilex-0.1-amd64.iso
+          mkdir -p evidence
+          printf 'candidate=%s\ncontroller=%s\n' "$EXPECTED_SHA" "$(git -C controller rev-parse HEAD)" > evidence/revisions.txt
+      - name: Real live desktop and Calamares installation on disposable disk
+        run: |
+          evidence="$PWD/evidence"
+          controller="$PWD/controller"
+          "$controller/tests/create-qa-seed.sh"
+          qemu-img create -f qcow2 "$evidence/disposable.qcow2" 32G
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd "$evidence/vars.fd"
+          accel=(-accel tcg,thread=multi -cpu qemu64)
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then accel=(-accel kvm -cpu host); fi
+          args=(-machine q35 -smp 2 -m 4096 "${accel[@]}"
+            -drive "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd"
+            -drive "if=pflash,format=raw,file=$evidence/vars.fd"
+            -drive "file=$evidence/disposable.qcow2,if=virtio,format=qcow2"
+            -drive "file=$PWD/candidate/dist/rilex-0.1-amd64.iso,media=cdrom,readonly=on,format=raw"
+            -drive "file=$controller/.cache/qa-seed.iso,media=cdrom,readonly=on,format=raw"
+            -device virtio-vga -display none -device qemu-xhci -device usb-tablet
+            -nic user,hostfwd=tcp:127.0.0.1:2223-:22 -boot d
+            -serial "file:$evidence/live-serial.log"
+            -qmp "unix:$evidence/live-qmp.sock,server=on,wait=off")
+          printf '%q ' qemu-system-x86_64 "${args[@]}" > "$evidence/live-command.txt"
+          qemu-system-x86_64 "${args[@]}" > "$evidence/live-qemu.log" 2>&1 &
+          qemu_pid=$!
+          trap 'kill "$qemu_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if [ -S "$evidence/live-qmp.sock" ]; then break; fi
+            kill -0 "$qemu_pid"; sleep 1
+          done
+          qmp=(python3 "$controller/tests/qmp.py" "$evidence/live-qmp.sock")
+          sleep 10
+          "${qmp[@]}" key e
+          sleep 2
+          "${qmp[@]}" key ctrl-home
+          "${qmp[@]}" key down
+          "${qmp[@]}" key down
+          "${qmp[@]}" key end
+          "${qmp[@]}" type ' systemd.debug_shell=1 console=ttyS0,115200'
+          "${qmp[@]}" screenshot "$evidence/grub-debug-edit.png"
+          "${qmp[@]}" key f10
+          for elapsed in 60 120 180 240 300; do
+            sleep 60
+            "${qmp[@]}" screenshot "$evidence/live-${elapsed}s.png"
+          done
+          "${qmp[@]}" key ctrl-alt-f9
+          sleep 5
+          "${qmp[@]}" type 'mkdir -p /mnt/qa; mount -o ro /dev/disk/by-label/RILEX_QA /mnt/qa; bash /mnt/qa/bootstrap.sh > /dev/ttyS0 2>&1'
+          "${qmp[@]}" key ret
+          key="$controller/.cache/qa_ed25519"
+          known="$evidence/known-hosts"
+          for attempt in $(seq 1 180); do
+            kill -0 "$qemu_pid"
+            ssh-keyscan -p 2223 127.0.0.1 > "$known" 2>/dev/null || true
+            if ssh -o BatchMode=yes -o ConnectTimeout=5 -o "UserKnownHostsFile=$known" -i "$key" -p 2223 root@127.0.0.1 true 2>/dev/null; then break; fi
+            sleep 5
+          done
+          ssh=(ssh -o BatchMode=yes -o "UserKnownHostsFile=$known" -i "$key" -p 2223 root@127.0.0.1)
+          "${ssh[@]}" 'test -f /run/live/medium/live/filesystem.squashfs; test "$(blockdev --getsize64 /dev/vda)" = 34359738368'
+          "${ssh[@]}" 'journalctl -b -u sddm --no-pager' > "$evidence/live-sddm.log"
+          "${ssh[@]}" 'runuser -u live -- env XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus bash /mnt/qa/check-live-session.sh' > "$evidence/live-checks.txt"
+          # Return to the ordinary live desktop; invoke the actual shipped installer.
+          "${qmp[@]}" key ctrl-alt-f2
+          sleep 5
+          python3 "$controller/tests/run-calamares-gui.py" --port 2223 --key "$key" --known-hosts "$known" --qmp "$evidence/live-qmp.sock" --evidence "$evidence/install" --credentials "$controller/.cache/install-credentials.json" --confirm-disposable-vda
+          "${ssh[@]}" 'lsblk -f; findmnt /tmp/calamares-root-*' > "$evidence/installed-layout.txt" || true
+          "${qmp[@]}" quit
+          wait "$qemu_pid"
+      - name: Independently boot installed disk without any virtual CD
+        run: |
+          evidence="$PWD/evidence"
+          controller="$PWD/controller"
+          accel=(-accel tcg,thread=multi -cpu qemu64)
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then accel=(-accel kvm -cpu host); fi
+          args=(-machine q35 -smp 2 -m 4096 "${accel[@]}"
+            -drive "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd"
+            -drive "if=pflash,format=raw,file=$evidence/vars.fd"
+            -drive "file=$evidence/disposable.qcow2,if=virtio,format=qcow2"
+            -device virtio-vga -display none -device qemu-xhci -device usb-tablet
+            -nic user -serial "file:$evidence/installed-serial.log"
+            -qmp "unix:$evidence/installed-qmp.sock,server=on,wait=off")
+          printf '%q ' qemu-system-x86_64 "${args[@]}" > "$evidence/installed-command.txt"
+          qemu-system-x86_64 "${args[@]}" > "$evidence/installed-qemu.log" 2>&1 &
+          qemu_pid=$!
+          trap 'kill "$qemu_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if [ -S "$evidence/installed-qmp.sock" ]; then break; fi
+            kill -0 "$qemu_pid"; sleep 1
+          done
+          python3 "$controller/tests/run-installed-qa.py" --qmp "$evidence/installed-qmp.sock" --credentials "$controller/.cache/install-credentials.json" --evidence "$evidence/installed" --serial-log "$evidence/installed-serial.log"
+          python3 "$controller/tests/qmp.py" "$evidence/installed-qmp.sock" quit
+          wait "$qemu_pid"
+      - name: Retain actual QA evidence (never credentials, keys or test disk)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rilex-installation-qa-evidence
+          path: |
+            evidence/**/*.png
+            evidence/**/*.log
+            evidence/**/*.txt
+            evidence/**/*.json
+          if-no-files-found: warn
