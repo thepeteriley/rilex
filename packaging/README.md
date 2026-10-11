@@ -19,3 +19,9 @@ Broadcom firmware is a separate provenance case. With live-build's firmware cove
 ```
 
 The actual emulated Debian build log (`dist/build-frozen.log`, 2026-10-10 18:57 UTC) records the HTTPS download of 7,684,610 bytes followed by `broadcom-wl-6.30.163.46.tar.bz2: OK`, then extraction of `wl_apsta.o`. Rilex leaves this Debian maintainer logic and checksum validation intact. Broadcom firmware retains its proprietary terms; the free extraction utility and Debian helper do not relicense the firmware. Inspect the installed package's copyright notices and the firmware's license before redistribution for other purposes. Broadcom radio behavior remains hardware-unverified.
+
+## Inspected 0.1 candidate provenance
+
+GitHub Actions build [38145830005](https://github.com/thepeteriley/rilex/actions/runs/38145830005) completed the candidate from source commit `feaca7002cb46eb391b0cf40fc5615a09be1d231`. Inspection of the downloaded `rilex-defaults_0.1.0_all.deb` found the same complete revision inside `/usr/share/rilex/build-info`, with package SHA-256 `fea10f3583a3914da5cd1edd710432af3a7bf4fd93c87667ae1340f8ae1b5e52`. Rilex defaults are the only custom-built Debian package; the compositor stack remains official Debian packages.
+
+The actual artifact package manifest records Hyprland `0.55.2+ds-1~bpo13+1`, Hyprlock `0.9.6-1~bpo13+1`, Hyprland portal `1.4.1-1~bpo13+1`, Waybar `0.12.0-1`, Fuzzel `1.12.0+ds-1`, Foot `1.21.0-2`, Calamares `3.3.14-1`, Debian installer settings `13.0.13-1`, Maui/SDDM `0.21.0+git20250502.4fe234b-2`, and standard Debian kernel `6.12.111-1`. The final build log records successful compositor package configuration and Broadcom archive checksum verification. Read-only extraction from the real ISO confirmed its 2,411,806-byte GRUB Unicode font, Rilex BIOS/UEFI menu labels, and charcoal GRUB theme. These are build/provenance checks; independent boot, desktop and installation validation remain separate release gates.
