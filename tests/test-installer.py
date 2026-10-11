@@ -15,6 +15,9 @@ class InstallerConfiguration(unittest.TestCase):
             self.assertIn('  - ' + name + '\n', s)
         self.assertLess(s.index('  - summary'), s.index('- exec:'))
         self.assertNotIn('  - bootloader-config\n', s)
+        self.assertNotIn('  - sources-media\n', s)
+        self.assertNotIn('  - sources-media-unmount\n', s)
+        self.assertIn('  - sources-final\n', s)
     def test_installer_live_guard(self):
         s = (ROOT / 'installer/rootfs/usr/bin/rilex-install').read_text()
         self.assertIn('/run/live/medium', s)
