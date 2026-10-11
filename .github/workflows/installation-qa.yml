@@ -112,7 +112,7 @@ jobs:
           ssh=(ssh -o BatchMode=yes -o "UserKnownHostsFile=$known" -i "$key" -p 2223 root@127.0.0.1)
           "${ssh[@]}" 'test -f /run/live/medium/live/filesystem.squashfs; test "$(blockdev --getsize64 /dev/vda)" = 34359738368'
           "${ssh[@]}" 'journalctl -b -u sddm --no-pager' > "$evidence/live-sddm.log"
-          "${ssh[@]}" 'runuser -u live -- env XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus bash /mnt/qa/check-live-session.sh' > "$evidence/live-checks.txt"
+          "${ssh[@]}" 'python3 -' < "$controller/tests/qa-live-session-env.py" > "$evidence/live-checks.txt"
           # Return to the ordinary live desktop; invoke the actual shipped installer.
           "${qmp[@]}" key ctrl-alt-f2
           sleep 5
