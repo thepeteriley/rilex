@@ -54,7 +54,7 @@ with os.fdopen(fd,'w') as f:
  json.dump({'name':'Rilex QA','username':'rilexqa','hostname':'rilex-qa','password':''.join(secrets.choice(string.ascii_letters+string.digits) for _ in range(24))},f)
 # Preserve the ordinary live-user environment and invoke the actual shipped
 # wrapper. This does not patch the ISO or replace Calamares jobs.
-remote("python3 - <<'END'\nimport os,subprocess\npids=subprocess.check_output(['pgrep','-u','live','-x','foot']).decode().split()\nif not pids: raise SystemExit('Need ordinary live Foot environment')\nenv=dict(x.split('=',1) for x in open('/proc/'+pids[0]+'/environ').read().split('\\0') if '=' in x)\nlog=open('/tmp/rilex-qa-installer.log','w')\nsubprocess.Popen(['runuser','-u','live','--','rilex-install'],env=env,stdout=log,stderr=log,start_new_session=True)\nEND")
+remote("python3 - <<'END'\nimport os,subprocess\npids=subprocess.check_output(['pgrep','-u','live','-x','foot']).decode().split()\nif not pids: raise SystemExit('Need ordinary live Foot environment')\nenv=dict(x.split('=',1) for x in open('/proc/'+pids[0]+'/environ').read().split('\\0') if '=' in x)\nlog=open('/tmp/rilex-qa-installer.log','w')\nsubprocess.Popen(['/usr/sbin/runuser','-u','live','--','rilex-install'],env=env,stdout=log,stderr=log,start_new_session=True)\nEND")
 time.sleep(25)
 # Hyprland sees actual QMP input rather than XWayland-only synthetic keys.
 # Immediate down/up avoids emulation timer key repeats.
@@ -63,7 +63,7 @@ subprocess.run(['python3',str(base/'qmp.py'),'--explicit-key-events',str(a.qmp),
 time.sleep(5)
 # Fixed Qt coordinates are permitted only after actual compositor geometry
 # and focused fullscreen installer verification; otherwise stop before disk UI.
-state=json.loads(remote("python3 - <<'END'\nimport json,subprocess\npid=subprocess.check_output(['pgrep','-u','live','-x','foot']).decode().split()[0]\nenv=dict(x.split('=',1) for x in open('/proc/'+pid+'/environ').read().split('\\0') if '=' in x)\ndef get(name): return json.loads(subprocess.check_output(['runuser','-u','live','--','hyprctl','-j',name],env=env))\nprint(json.dumps({'monitors':get('monitors'),'active':get('activewindow')}))\nEND"))
+state=json.loads(remote("python3 - <<'END'\nimport json,subprocess\npid=subprocess.check_output(['pgrep','-u','live','-x','foot']).decode().split()[0]\nenv=dict(x.split('=',1) for x in open('/proc/'+pid+'/environ').read().split('\\0') if '=' in x)\ndef get(name): return json.loads(subprocess.check_output(['/usr/sbin/runuser','-u','live','--','hyprctl','-j',name],env=env))\nprint(json.dumps({'monitors':get('monitors'),'active':get('activewindow')}))\nEND"))
 (a.evidence/'installer-geometry.json').write_text(json.dumps(state,indent=2))
 active=state['active']
 monitor=next((m for m in state['monitors'] if m.get('id')==active.get('monitor')),None)
