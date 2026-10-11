@@ -155,3 +155,20 @@ click the actual GUI summary and destructive modal; it records screenshots of
 both and rechecks the disposable guest guard first. This path is experimental
 and must be judged from actual job logs and independent installed-system boot.
 The helper never calls partition tools directly.
+
+The experimental native-VM controller `tests/run-calamares-gui.py` automates
+those staged English wizard inputs with an explicit `--confirm-disposable-vda`
+flag. It starts the actual shipped installer wrapper, records every page,
+creates a private random QA credential JSON and requires Calamares's real
+`completion: succeeded` log message. Its guarded disk must be a 32 GiB QEMU
+`vda`; QA-only xdotool and SSH stay in the live overlay.
+
+After stopping that VM, launch its disposable installed disk with **no ISO or
+QA seed attached**. `tests/run-installed-qa.py --qmp SOCKET --credentials JSON
+--evidence DIR --serial-log FILE` checks the QMP media inventory, enters the
+normal user's SDDM password privately, opens Foot and authenticates sudo. The
+actual normal-user shell verifies installed identity, absence of live media,
+Hyprland, Waybar, networking, audio, portal and signed APT refresh. A strict
+success marker must arrive in QEMU's serial log; keyboard API success alone
+cannot pass the test. Its default boot wait is 180 seconds. These fixed wizard
+and greeter assumptions are experimental and screenshots require review.
