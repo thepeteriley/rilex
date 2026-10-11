@@ -7,5 +7,8 @@ apt-get -y -t trixie-backports install \
  hyprland=0.55.2+ds-1~bpo13+1 \
  hyprlock=0.9.6-1~bpo13+1 \
  xdg-desktop-portal-hyprland=1.4.1-1~bpo13+1
+# Required for unresponsive-app, permission and safe-mode dialogs. Select the
+# exact signed backport without changing the target suite for its dependencies.
+apt-get -y install hyprland-guiutils=0.2.2-1~bpo13+1
 mkdir -p /usr/share/rilex
 LC_ALL=C dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' > /usr/share/rilex/package-manifest.tsv

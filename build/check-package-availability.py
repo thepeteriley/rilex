@@ -31,7 +31,7 @@ for line in (root / 'config/package-lists/rilex.list.chroot').read_text().splitl
         continue
     if name not in available or 'trixie' not in available[name]:
         missing.append(name)
-for name in ['hyprland', 'hyprlock', 'xdg-desktop-portal-hyprland']:
+for name in ['hyprland', 'hyprlock', 'hyprland-guiutils', 'xdg-desktop-portal-hyprland']:
     print(f'{name}: {available.get(name, {})}')
 if missing:
     raise SystemExit(f'Packages unavailable in stable: {missing}')
