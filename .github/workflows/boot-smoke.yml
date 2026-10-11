@@ -18,6 +18,12 @@ on:
         type: choice
         default: plain
         options: [plain, virgl]
+      tcg_cpu:
+        description: Emulated CPU baseline (qemu64 avoids the observed max/llvmpipe AVX2 crash)
+        required: true
+        type: choice
+        default: qemu64
+        options: [qemu64, max]
       diagnostic_shell:
         description: Enable an ephemeral root debug shell for VM-only log collection
         required: true
@@ -73,6 +79,7 @@ jobs:
           BOOT_MODE: ${{ inputs.boot_mode }}
           GRAPHICS: ${{ inputs.graphics }}
           DIAGNOSTIC_SHELL: ${{ inputs.diagnostic_shell }}
+          TCG_CPU: ${{ inputs.tcg_cpu }}
         run: |
           mkdir -p .cache/boot-smoke
           evidence="$PWD/.cache/boot-smoke"
@@ -94,7 +101,8 @@ jobs:
           fi
           graphics=(-device virtio-vga -display none)
           if [ "$GRAPHICS" = virgl ]; then graphics=(-device virtio-vga-gl -display gtk,gl=on); fi
-          accel=(-accel tcg,thread=multi -cpu max)
+          qemu-system-x86_64 --version > "$evidence/qemu-version.txt"
+          accel=(-accel tcg,thread=multi -cpu "$TCG_CPU")
           if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then accel=(-accel kvm -cpu host); fi
           args=(-machine q35 -smp 2 -m 4096 "${accel[@]}"
             "${firmware[@]}"
