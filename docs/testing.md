@@ -199,3 +199,19 @@ the unchanged bindings but are not a claim that every shortcut was exercised
 on the final ISO. Directional moves, all resize directions, split changes and
 workspace transfers across multiple monitors remain outside the recorded
 interaction evidence. Monitor transfers also require a second active output.
+
+The replacement image including pinned `hyprland-guiutils`, built from exact
+source `5efe9878386ae51e884ad391ea0045e19a519c66` in
+[38148757735](https://github.com/thepeteriley/rilex/actions/runs/38148757735),
+passed independent native Linux QEMU 8.2 / TCG `qemu64` live boots:
+[UEFI 38156157185](https://github.com/thepeteriley/rilex/actions/runs/38156157185)
+and [BIOS 38156158288](https://github.com/thepeteriley/rilex/actions/runs/38156158288).
+Both exact-source, checksum and ISO structure gates passed. Inspected
+300-second screenshots show the 1280×800 Rilex Hyprland desktop, Waybar, Foot
+Welcome and wallpaper. UEFI guest diagnostics confirm successful SDDM session
+startup and llvmpipe LLVM 19.1.7 (128-bit), without a crash or the earlier
+`hyprland-dialog missing from PATH, cannot start ANRManager` error. No warning
+overlay appears in the captured desktop; because startup notifications expire,
+that screenshot alone cannot prove their absence during the first 15 seconds.
+The separate installation test must use this replacement image before these
+live boot results can qualify a release.
