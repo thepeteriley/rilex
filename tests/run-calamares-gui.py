@@ -40,7 +40,7 @@ def input_action(action):
  time.sleep(5)
 
 # Guard before installing ephemeral QA-only input tooling or opening installer.
-remote('test -f /run/live/medium/live/filesystem.squashfs; '
+remote('set -eu; test -f /run/live/medium/live/filesystem.squashfs; '
        'case "$(cat /sys/class/dmi/id/product_name) $(cat /sys/class/dmi/id/sys_vendor)" in *QEMU*|*KVM*) ;; *) exit 80;; esac; '
        'test "$(lsblk -dn -o NAME,TYPE | awk \'$2=="disk" {print $1}\')" = vda; '
        'test "$(blockdev --getsize64 /dev/vda)" = 34359738368')
