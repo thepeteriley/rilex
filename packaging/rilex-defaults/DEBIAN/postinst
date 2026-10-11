@@ -5,7 +5,7 @@ if [ "$1" = configure ]; then
  sddm_home=$(getent passwd sddm | cut -d: -f6)
  if [ -n "$sddm_home" ] && [ ! -s "$sddm_home/state.conf" ]; then
   install -d -o sddm -g sddm -m 0750 "$sddm_home"
-  printf '[Last]\nSession=rilex.desktop\n' > "$sddm_home/state.conf"
+  printf '[Last]\nSession=/usr/share/wayland-sessions/rilex.desktop\n' > "$sddm_home/state.conf"
   chown sddm:sddm "$sddm_home/state.conf"
   chmod 0600 "$sddm_home/state.conf"
  fi
