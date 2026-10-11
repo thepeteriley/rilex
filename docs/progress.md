@@ -255,3 +255,19 @@ metadata exposed all eleven assets, the downloaded ISO checksum matched the
 local checksum file, and an HTTP range request retrieved the real ISO9660
 filesystem descriptor from the published ISO. No full second ISO download
 was needed; its complete remote content digest and size had already matched.
+
+## User guide (2026-10-11)
+
+Added a complete user guide for the published 0.1 release: image verification,
+USB creation on Linux/macOS/Windows, live hardware checks, the verified UEFI
+installation path, Welcome, keyboard workflows, application use, networking,
+audio, clipboard/screenshots, Lua overrides, development environments, updates,
+backup/security and recovery. Unsupported encryption, unverified hardware and
+unconfigured idle/suspend locking are explicitly documented.
+
+The Markdown source has a reproducible, separately generated printable PDF
+with a linked contents page and 18 chapter bookmarks. Reviewed rendered pages,
+checked contents anchors and shell-snippet syntax, and compared desktop/menu
+instructions with shipped configuration. This documentation update does not
+rebuild or change the released ISO; its bundled documents remain build-time
+copies. Generated PDFs and previews are excluded from Git.

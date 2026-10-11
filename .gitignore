@@ -12,3 +12,5 @@ __pycache__/
 *.key
 
 .build/
+output/
+tmp/pdfs/

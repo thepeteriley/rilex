@@ -17,6 +17,9 @@ Hyprland comes from official Debian Trixie backports. The base remains Stable;
 Testing and Unstable are not used. Rilex is independently maintained and is not
 affiliated with Debian or Omarchy.
 
+Start with the complete [Rilex user guide](docs/user-guide.md), covering installation,
+keyboard workflows, customization, maintenance and recovery.
+
 See [build instructions](docs/building.md), [installation](docs/installation.md),
 [keyboard shortcuts](docs/keyboard-shortcuts.md), [architecture](docs/architecture.md),
 [updates](docs/updates.md), [testing](docs/testing.md), and [progress](docs/progress.md).

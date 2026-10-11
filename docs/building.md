@@ -91,3 +91,19 @@ gh workflow run stage-release.yml \
 Publication remains a separate maintainer action after reviewing the staged
 assets and release notes. No signing keys or account secrets are stored in the
 repository; the workflow uses GitHub's scoped job token.
+## Rendering the user guide
+
+The expanded guide is maintained in `docs/user-guide.md`. Its printable PDF can
+be generated independently of the ISO; generated PDFs are excluded from Git.
+Use Python 3.12 or newer with an isolated environment and either Debian's
+`fonts-dejavu-core` or macOS's standard Arial fonts:
+
+```sh
+python3 -m venv .cache/docs-venv
+.cache/docs-venv/bin/python -m pip install -r build/docs-requirements.txt
+.cache/docs-venv/bin/python build/render-user-guide.py
+```
+
+Output: `output/pdf/rilex-0.1-user-guide.pdf`. The PDF includes a linked table of
+contents and chapter bookmarks. Review page rendering after content changes;
+the generator does not replace visual quality assurance.
