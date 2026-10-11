@@ -2,10 +2,16 @@
 
 A Linux desktop built for people who prefer keyboards to mice.
 
-Rilex 0.1 is a Debian 13 Trixie amd64 distribution in development, integrating
-Hyprland, Waybar, Fuzzel and Foot with a restrained charcoal and blue desktop.
-**No verified release is available yet.** Installation verification is required
-before publishing an ISO release or tagging v0.1.0.
+Rilex 0.1 is a Debian 13 Trixie amd64 distribution integrating Hyprland,
+Waybar, Fuzzel and Foot with a restrained charcoal and blue desktop.
+[Download v0.1.0](https://github.com/thepeteriley/rilex/releases/tag/v0.1.0):
+a real hybrid ISO, checksum, package manifest and verified build attestations.
+
+The image passed UEFI and BIOS live boot, graphical Calamares installation,
+independent disk-only boot, normal password login and signed Debian APT refresh
+in QEMU. Read the [release test report](docs/release-0.1.md) before installing.
+Secure Boot, encryption and physical laptop compatibility remain unverified;
+this first release is intended for careful testing on a spare machine.
 
 Hyprland comes from official Debian Trixie backports. The base remains Stable;
 Testing and Unstable are not used. Rilex is independently maintained and is not

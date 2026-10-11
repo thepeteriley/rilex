@@ -1,8 +1,8 @@
 # Installing Rilex
 
-Rilex is a Debian derivative, not an official Debian product. Only install a release whose testing record confirms an independent installed-system boot. At present this project is in development; consult `testing.md` for actual results.
+Rilex is a Debian derivative, not an official Debian product. Only install a release whose testing record confirms an independent installed-system boot. Rilex 0.1 passed UEFI graphical installation and independent installed-system boot in QEMU; consult [testing](testing.md) for actual results and hardware limits.
 
-Download the ISO and adjacent SHA-256 file from the published release, when one exists. On Linux run `sha256sum -c rilex-0.1-amd64.iso.sha256`; on macOS compare `shasum -a 256 rilex-0.1-amd64.iso` to the checksum. On Windows use PowerShell `Get-FileHash .\rilex-0.1-amd64.iso -Algorithm SHA256`.
+Download the ISO and adjacent SHA-256 file from [the v0.1.0 release](https://github.com/thepeteriley/rilex/releases/tag/v0.1.0). On Linux run `sha256sum -c rilex-0.1-amd64.iso.sha256`; on macOS compare `shasum -a 256 rilex-0.1-amd64.iso` to the checksum. On Windows use PowerShell `Get-FileHash .\rilex-0.1-amd64.iso -Algorithm SHA256`.
 
 Debian documents hybrid USB imaging in its [USB image FAQ](https://www.debian.org/CD/faq/#write-usb). Rufus documents its optional [DD image mode](https://github.com/pbatard/rufus/wiki/FAQ#why-doesnt-rufus-recommend-dd-mode-over-iso-mode-for-isohybrid-images-surely-dd-is-better).
 
@@ -10,8 +10,8 @@ Write the ISO with a graphical imaging utility that supports hybrid Linux ISOs. 
 
 On a spare laptop, back up its data, disable Secure Boot (not verified), and select the USB in the firmware boot menu. Use the live session first: launching applications does not install the OS. Test Wi-Fi, audio, keyboard, display brightness, suspend, and external monitors before deciding to install.
 
-Open **Install Rilex** from Super+Space. Calamares offers language, time zone, keyboard, partitioning, user creation, hostname, and a summary. Automatic partitioning erases the selected disk; manual partitioning requires understanding the existing partition layout. With UEFI, preserve and mount an existing EFI System Partition at `/boot/efi` when retaining another OS. Read the summary and explicit confirmation before proceeding. Never select a disk whose contents you need to keep without a verified backup. Automatic encryption is disabled. Manual partition dialogs may still expose encryption; do not select it because encrypted installation is unsupported in this development version.
+Open **Install Rilex** from Super+Space. Calamares offers language, time zone, keyboard, partitioning, user creation, hostname, and a summary. Automatic partitioning erases the selected disk; manual partitioning requires understanding the existing partition layout. With UEFI, preserve and mount an existing EFI System Partition at `/boot/efi` when retaining another OS. Read the summary and explicit confirmation before proceeding. Never select a disk whose contents you need to keep without a verified backup. Automatic encryption is disabled. Manual partition dialogs may still expose encryption; do not select it because encrypted installation is unsupported in version 0.1.
 
 When installation finishes, reboot and remove the USB. Log in with the account and password you created. Confirm Wi-Fi and run `sudo apt update`. The installed desktop must not automatically log in to the live account. Installer logs are typically in the live user's `~/.cache/calamares/session.log`; also preserve `/var/log/Calamares.log` if present. If installation fails, keep logs before rebooting.
 
-The intended image supports amd64 UEFI and legacy BIOS. Support claims depend on the corresponding recorded VM boot tests; successful image creation alone does not establish either mode.
+The image passed amd64 UEFI and legacy BIOS live boot, and UEFI installation with independent boot. Installed BIOS boot, manual partitioning and reuse of an existing EFI partition remain unverified. Secure Boot and encryption are unsupported for this release.

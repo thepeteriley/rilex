@@ -1,6 +1,6 @@
 # Rilex 0.1 progress
 
-Status: development, not a verified release.
+Status: final image qualified by real VM installation and independent boot; release publication in progress. Historical entries below record earlier candidates and unresolved work at their respective timestamps.
 
 ## Host inspection (2026-10-10)
 - macOS 27.0.1, ARM64, 8 CPUs, 24 GiB RAM, 1.3 TiB free.
@@ -17,9 +17,9 @@ Status: development, not a verified release.
 - [x] Implement live-build and Debian defaults package.
 - [x] Implement Hyprland desktop and welcome utility; 53 expanded bindings statically checked.
 - [x] Configure Calamares; seven automated installer checks pass.
-- [x] Build real hybrid ISO (two hosted candidates; release qualification pending).
+- [x] Build final real hybrid ISO from source `5efe9878386ae51e884ad391ea0045e19a519c66`.
 - [x] Test final-image UEFI/BIOS live desktop.
-- [ ] Install to disposable VM disk and independently boot.
+- [x] Install final image to disposable VM disk, independently boot without ISO, log in normally and refresh signed APT metadata.
 - [x] Publish source repository: https://github.com/thepeteriley/rilex.
 - [ ] Publish verified release and checksums; tag only after installation tests pass.
 
@@ -217,3 +217,15 @@ the raw serial output. Screenshots/logs are under ignored
 private keys and test disks were excluded. The latest-image installation,
 independent-boot, normal-user and APT gates now pass. Hardware-dependent features
 and the separately documented unsupported cases remain unverified.
+
+## Release qualification (2026-10-11)
+
+Final source `5efe9878386ae51e884ad391ea0045e19a519c66` passed the actual
+release installation/boot/login/APT gates. The ISO is 1,773,174,784 bytes,
+SHA-256 `0ecd67abaabd1d796619f98ba59b1b1f7d2c90f262be4ece5e2bee5fca65235e`.
+ISO and defaults package attestations were cryptographically verified, including
+local-bundle verification without GitHub authentication. Extended installed
+component QA passed real application/clipboard/file selection and five
+portal-authorized video buffers after correcting unspecified test-pipeline caps;
+no desktop/security changes were needed. See [release report](release-0.1.md).
+The tag will identify the exact image source, while main retains later QA evidence.
