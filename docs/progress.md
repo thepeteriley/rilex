@@ -16,9 +16,9 @@ Status: development, not a verified release.
 - [x] Establish Debian amd64 build VM (HTTPS SHA-512 image manifest checked; no detached manifest signature available).
 - [x] Implement live-build and Debian defaults package.
 - [x] Implement Hyprland desktop and welcome utility; 53 expanded bindings statically checked.
-- [x] Configure Calamares and run five static checks; runtime installation pending.
+- [x] Configure Calamares; seven automated installer checks pass.
 - [x] Build real hybrid ISO (two hosted candidates; release qualification pending).
-- [ ] Test UEFI/BIOS live desktop.
+- [x] Test final-image UEFI/BIOS live desktop.
 - [ ] Install to disposable VM disk and independently boot.
 - [x] Publish source repository: https://github.com/thepeteriley/rilex.
 - [ ] Publish verified release and checksums; tag only after installation tests pass.
@@ -144,3 +144,34 @@ live media and exactly one 32 GiB `/dev/vda`, and sends private QA credentials
 over SSH stdin. It deliberately leaves screenshots, summary review and the
 final destructive confirmation to the QA operator. Python compilation and
 all seven installer static assertions pass; final-image runtime remains open.
+
+## Final candidate qualification (2026-10-11)
+
+The current `dist/rilex-0.1-amd64.iso` supersedes every historical candidate
+above. It was built from `feaca7002cb46eb391b0cf40fc5615a09be1d231` by
+[38145830005](https://github.com/thepeteriley/rilex/actions/runs/38145830005),
+is 1,771,438,080 bytes, and has SHA-256
+`5f8cdc97ee62a33dde1e444325d087d1b648a8b046595cf97c44e9f80717324d`.
+The artifact archive, ISO structure, embedded source revision and GitHub
+cryptographic build attestations passed verification. Separate final-image
+native Linux QEMU live boots passed in UEFI
+[38146559897](https://github.com/thepeteriley/rilex/actions/runs/38146559897)
+and BIOS [38146562538](https://github.com/thepeteriley/rilex/actions/runs/38146562538).
+Both inspected screenshots show Hyprland, Waybar and Foot Welcome.
+
+The same final ISO also passed all 17 local live checks with QEMU 11.1.2 TCG
+on macOS ARM64. The actual compositor reported 53 bindings and no config
+errors. Super+Space launched Fuzzel, which launched Foot; workspace switching,
+terminal and fullscreen bindings were observed. The first-login Pictures
+folder was created automatically. Evidence is in the ignored private
+`.cache/qa-final-uefi` directory.
+
+The final local Calamares wizard accepted a newly generated private test
+account and reached reviewed partition summary and explicit destructive
+confirmation. Only a disposable 32 GiB virtual disk was selected. Its real
+38-job installation has reached initramfs generation after copying the system
+and installing UEFI GRUB and fallback EFI. Target GRUB defaults contain only
+`quiet`, with no QA debug-shell/serial boot parameters. Completion and
+independent disk-only boot are still pending; native installation run
+[38147436556](https://github.com/thepeteriley/rilex/actions/runs/38147436556)
+is also in progress. No release/tag has been created.
