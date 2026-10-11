@@ -8,6 +8,11 @@ fi
 if ! systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service; then
  logger -t rilex-session 'Could not start audio services; inspect systemctl --user status'
 fi
+# A compositor session does not execute desktop-environment XDG autostarts.
+# Create localized standard folders once and honor existing user choices.
+if ! xdg-user-dirs-update; then
+ logger -t rilex-session 'Could not initialize standard user directories'
+fi
 rilex-bar &
 mako &
 rilex-wallpaper &

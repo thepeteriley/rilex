@@ -122,3 +122,10 @@ boot and normal-user login are being verified; this older diagnostic image
 is not the release candidate. Unsupported media-APT jobs were removed after
 checking that our ISO contains no Debian package archive. Final source
 7d25250 is building in run38145470988; final-image installation remains a gate.
+
+Actual screenshot selection on e7fd8e4 saved a PNG and copied `image/png`.
+It also exposed missing first-login XDG folder initialization: the fallback
+was `$HOME/Screenshots` instead of the documented Pictures folder. The session
+now runs Debian's installed `xdg-user-dirs-update`, preserving existing choices.
+Running that real tool in the guest created Pictures successfully. This fix
+requires the next final-image boot to verify its automatic invocation.
