@@ -149,5 +149,9 @@ with name, username, hostname and password fields. Install QA-only `xdotool`
 through signed APT in the live overlay first. The helper requires fullscreen
 1280x800 English Calamares and checks QEMU, live media, exactly one disk and its
 32GiB size before acting. Capture and review each wizard page using `qmp.py`;
-inspect the summary and personally accept the disposable-disk confirmation.
-The helper does not launch an unattended partition operation.
+inspect the summary before confirming. An explicitly authorized CI operator may
+use `confirm-install --confirm-disposable-vda --qmp SOCKET --evidence DIR` to
+click the actual GUI summary and destructive modal; it records screenshots of
+both and rechecks the disposable guest guard first. This path is experimental
+and must be judged from actual job logs and independent installed-system boot.
+The helper never calls partition tools directly.

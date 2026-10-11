@@ -2,8 +2,8 @@
 """Staged QA input for Calamares in a disposable QEMU guest.
 
 Requires QA-only xdotool installed in the live guest. Never launches Calamares,
-partitions a disk, or accepts the destructive confirmation automatically.
-Screenshot/review each page using qmp.py before moving on. Coordinates assume
+partitions a disk directly. Confirmation needs explicit disposable-disk authorization.
+Screenshot/review each page using qmp.py before moving on; confirmation captures evidence. Coordinates assume
 Calamares is fullscreen at 1280x800, US keyboard and its English wizard.
 """
 import argparse
@@ -17,7 +17,10 @@ p.add_argument('--port', type=int, required=True)
 p.add_argument('--key', type=Path, required=True)
 p.add_argument('--known-hosts', type=Path, required=True)
 p.add_argument('--credentials', type=Path)
-p.add_argument('action', choices=['next', 'erase-selection', 'account', 'clear-modifiers'])
+p.add_argument('action', choices=['next', 'erase-selection', 'account', 'clear-modifiers', 'confirm-install'])
+p.add_argument('--confirm-disposable-vda', action='store_true', help='Explicitly authorize only the guarded 32 GiB disposable QEMU disk GUI confirmation.')
+p.add_argument('--qmp', type=Path, help='QMP socket for mandatory confirmation screenshots')
+p.add_argument('--evidence', type=Path, help='Ignored evidence directory')
 a = p.parse_args()
 ssh = ['ssh', '-o', 'BatchMode=yes', '-o', f'UserKnownHostsFile={a.known_hosts}',
        '-i', str(a.key), '-p', str(a.port), 'root@127.0.0.1']
@@ -59,3 +62,22 @@ elif a.action == 'account':
         # The random QA credential goes over SSH stdin, never argv or logs.
         run('xdotool type --clearmodifiers --delay 200 --file -', values[key])
     print('Entered private QA account fields; inspect them and keep autologin disabled.')
+
+elif a.action == 'confirm-install':
+    if not (a.confirm_disposable_vda and a.qmp and a.evidence):
+        p.error('confirmation requires --confirm-disposable-vda --qmp --evidence')
+    a.evidence.mkdir(parents=True, exist_ok=True)
+    qmp = Path(__file__).with_name('qmp.py')
+    def capture(name):
+        subprocess.run(['python3', str(qmp), str(a.qmp), 'screenshot',
+                        str(a.evidence / name)], check=True)
+    capture('install-summary-before-confirmation.png')
+    click(1134,780)
+    import time
+    time.sleep(3)
+    capture('install-destructive-modal.png')
+    # Actual reviewed Calamares English modal: Install Now. This action is
+    # explicitly gated and never implemented as direct partition commands.
+    click(735,392)
+    time.sleep(3)
+    capture('install-progress-start.png')
