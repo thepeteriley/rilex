@@ -1,6 +1,6 @@
 # Rilex 0.1 progress
 
-Status: final image qualified by real VM installation and independent boot; release publication in progress. Historical entries below record earlier candidates and unresolved work at their respective timestamps.
+Status: Rilex 0.1 published as v0.1.0 after real VM installation and independent boot. Historical entries below record earlier candidates and unresolved work at their respective timestamps.
 
 ## Host inspection (2026-10-10)
 - macOS 27.0.1, ARM64, 8 CPUs, 24 GiB RAM, 1.3 TiB free.
@@ -21,7 +21,7 @@ Status: final image qualified by real VM installation and independent boot; rele
 - [x] Test final-image UEFI/BIOS live desktop.
 - [x] Install final image to disposable VM disk, independently boot without ISO, log in normally and refresh signed APT metadata.
 - [x] Publish source repository: https://github.com/thepeteriley/rilex.
-- [ ] Publish verified release and checksums; tag only after installation tests pass.
+- [x] Publish verified release, checksums, attestations and actual QA evidence; tag created after installation tests passed.
 
 Hyprland package indexed as 0.55.2+ds-1~bpo13+1 in official
 trixie-backports. Signed APT metadata was verified by debootstrap. Actual APT simulation resolved
@@ -228,4 +228,30 @@ local-bundle verification without GitHub authentication. Extended installed
 component QA passed real application/clipboard/file selection and five
 portal-authorized video buffers after correcting unspecified test-pipeline caps;
 no desktop/security changes were needed. See [release report](release-0.1.md).
-The tag will identify the exact image source, while main retains later QA evidence.
+The tag identifies the exact image source, while main retains later QA evidence.
+
+## Published release (2026-10-11)
+
+[Public v0.1.0 release](https://github.com/thepeteriley/rilex/releases/tag/v0.1.0)
+was published at 17:29:38 UTC. Its eleven assets include the actual ISO, ISO
+checksum, package manifest, defaults Debian package, real attestation bundles,
+source revision, test report, selected installation/portal evidence and
+SHA256SUMS. All eleven GitHub asset sizes and server-generated SHA-256 digests
+were independently compared to the verified local files and matched.
+
+The local ISO transfer was canceled because of slow upload bandwidth;
+[successful direct staging run 38159636324](https://github.com/thepeteriley/rilex/actions/runs/38159636324)
+transferred the same attested build artifact to the existing draft after
+checking exact source/tag, checksum and actual installed-guest success evidence.
+An initial staging attempt stopped on a missing runner `rg`; standard-library
+Python checks fixed that prerequisite without changing the ISO or weakening
+validation. The draft was made public only after all asset comparisons passed.
+Temporary QA servers, samplers and virtual machines were stopped cleanly.
+No host physical disk was modified. Hardware and support limits remain those
+in the [release report](release-0.1.md) and [known issues](known-issues.md).
+
+Anonymous access was also tested without any GitHub token: public release
+metadata exposed all eleven assets, the downloaded ISO checksum matched the
+local checksum file, and an HTTP range request retrieved the real ISO9660
+filesystem descriptor from the published ISO. No full second ISO download
+was needed; its complete remote content digest and size had already matched.
