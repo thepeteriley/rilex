@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Interactive disposable-guest ScreenCast handshake; does not sample frames.
+"""Interactive disposable-guest ScreenCast handshake and optional frame probe.
 
 Requires python3-gi and an ordinary logged-in desktop user's session bus.
 API: https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.ScreenCast.html
