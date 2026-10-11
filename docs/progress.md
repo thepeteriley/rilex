@@ -175,3 +175,20 @@ and installing UEFI GRUB and fallback EFI. Target GRUB defaults contain only
 independent disk-only boot are still pending; native installation run
 [38147436556](https://github.com/thepeteriley/rilex/actions/runs/38147436556)
 is also in progress. No release/tag has been created.
+
+The final `feaca70` candidate completed all 38 actual Calamares jobs at
+2026-10-11 14:44 UTC. A new QEMU process booted only its installed qcow2 disk;
+QMP inventory confirmed no inserted CD media. The newly created normal user
+logged in through password-protected SDDM to Rilex Hyprland. Actual shell checks
+passed Hyprland, Waybar, Foot, NetworkManager, PipeWire, WirePlumber, Hyprland
+portal and signed APT refresh against all four official Debian channels.
+The serial log contains the strict `RILEX_INSTALLED_QA_PASS` marker; screenshots
+and inventory are under `.cache/qa-final-installed`. Installed boot defaults
+contained no ephemeral QA debug parameters. The QA controller's single-client
+QMP socket ownership was corrected in ac75982; no ISO changes were required.
+
+First-login inspection exposed a missing `hyprland-guiutils` utility. Upstream
+uses its dialog for unresponsive applications; official backports provide a
+compatible small package. It will be added and a new image rebuilt/retested
+before release. This successful installation qualifies `feaca70`, not a future
+image. No release/tag exists yet.
