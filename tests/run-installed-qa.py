@@ -51,7 +51,7 @@ qmp('type','sudo -v');qmp('key','ret');time.sleep(3)
 password();qmp('key','ret');time.sleep(3)
 # Run in the normal created user's graphical terminal. Environment/session
 # checks catch failed login instead of treating keyboard API success as proof.
-check="( set -e; test $(id -u) -ne 0; test $(id -un) = rilexqa; test ! -d /run/live/medium; grep -qx ID=rilex /etc/os-release; test -s /boot/grub/grub.cfg; hyprctl version; pgrep -u $(id -u) -x waybar; pgrep -u $(id -u) -x foot; systemctl is-active NetworkManager; systemctl --user is-active pipewire wireplumber; systemctl --user is-active xdg-desktop-portal-hyprland; sudo apt-get update; printf '\nRILEX_INSTALLED_QA_PASS\n'; ) 2>&1 | sudo tee /dev/ttyS0"
+check="( set -e; test $(id -u) -ne 0; test $(id -un) = rilexqa; test ! -d /run/live/medium; ! grep -q systemd.debug_shell=1 /proc/cmdline; grep -qx ID=rilex /etc/os-release; test -s /boot/grub/grub.cfg; hyprctl version; pgrep -u $(id -u) -x waybar; pgrep -u $(id -u) -x foot; systemctl is-active NetworkManager; systemctl --user is-active pipewire; systemctl --user is-active wireplumber; systemctl --user is-active xdg-desktop-portal-hyprland; sudo apt-get update; printf '\nRILEX_INSTALLED_QA_PASS\n'; ) 2>&1 | sudo tee /dev/ttyS0"
 qmp('type',check);qmp('key','ret')
 for attempt in range(90):
  time.sleep(5)
