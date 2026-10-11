@@ -73,9 +73,14 @@ jobs:
           test ! -L candidate/rilex-0.1-amd64.iso
           printf '%s  %s\n' "$EXPECTED_ISO_SHA256" candidate/rilex-0.1-amd64.iso | sha256sum --check
           (cd candidate && sha256sum --check rilex-0.1-amd64.iso.sha256)
-          rg -x "candidate=$(cat expected-source.txt)" evidence/revisions.txt
-          rg '^RILEX_INSTALLED_QA_PASS\r?$' evidence/installed-serial.log
-          rg '^PASS actual normal graphical login' evidence/installed/independent-result.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('expected-source.txt').read_text().strip()
+          assert f'candidate={source}' in Path('evidence/revisions.txt').read_text().splitlines()
+          assert 'RILEX_INSTALLED_QA_PASS' in Path('evidence/installed-serial.log').read_text().splitlines()
+          assert Path('evidence/installed/independent-result.txt').read_text().startswith('PASS actual normal graphical login')
+          print('Actual installed-guest marker, result and candidate source verified.')
+          PY
           gh attestation verify candidate/rilex-0.1-amd64.iso \
             --repo "$GITHUB_REPOSITORY" \
             --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build.yml"
