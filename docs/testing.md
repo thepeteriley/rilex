@@ -178,3 +178,24 @@ BIOS run [38145981415](https://github.com/thepeteriley/rilex/actions/runs/381459
 The manual `installation-qa.yml` workflow verifies a selected successful build's exact source and ISO, uses a separate checkout for the newer QA controllers, and starts a fresh 32 GB QEMU disk. A separate test CD supplies ephemeral SSH access only inside the disposable live guest. It runs the ordinary live-session checks and the real graphical Calamares workflow, requires actual installer-log completion, then shuts down the live VM. A new VM boots only the installed disk with no virtual CD attached; the driver must perform normal SDDM login and receive the guest's strict installed-system success marker after desktop, audio, portal, networking and signed APT checks. Evidence excludes the random credential file, SSH private key and virtual disk. A workflow definition is not a passed test; actual results must be recorded after inspecting its logs and screenshots.
 
 The final `feaca70` image from build [38145830005](https://github.com/thepeteriley/rilex/actions/runs/38145830005) passed separate native Linux QEMU 8.2 TCG / `qemu64` live boot tests: [UEFI 38146559897](https://github.com/thepeteriley/rilex/actions/runs/38146559897) and [BIOS 38146562538](https://github.com/thepeteriley/rilex/actions/runs/38146562538). Both workflows first verified the exact source, SHA-256 checksum and ISO boot structure. Both inspected 300-second screenshots show a 1280×800 Hyprland desktop with Rilex Waybar, styled Foot Welcome and wallpaper. The UEFI guest diagnostic log confirms successful SDDM session startup and llvmpipe LLVM 19.1.7 (128-bit), without the earlier crash. Expected unsuccessful nested-Wayland/EGL probes fall back to working DRM software rendering; no missing GRUB font warning appeared. These are live boot results. The separate final-image Calamares installation and independent installed-system boot must pass before release readiness can be claimed.
+
+## Keyboard verification scope
+
+The final live guest's retained `bindings.json` reports 53 registered bindings;
+the static dispatcher schema also validates 53 unique expanded bindings.
+Arguments were reviewed against the pinned [Hyprland v0.55.2 Lua dispatcher source](https://github.com/hyprwm/Hyprland/blob/v0.55.2/src/config/lua/bindings/LuaBindingsDispatchers.cpp):
+H/J/K/L direction names, numeric workspaces, relative pixel resizing, floating
+and fullscreen toggles, and relative monitor selectors use that version's API.
+Moving a window to a workspace follows it by default. Super+Shift+Space sends
+`togglesplit` to dwindle; this changes an applicable tiled split's orientation,
+and is not a switch to another layout. It requires a suitable multi-window
+split, as shown by the pinned [dwindle implementation](https://github.com/hyprwm/Hyprland/blob/v0.55.2/src/layout/algorithm/tiled/dwindle/DwindleAlgorithm.cpp).
+
+Earlier real QEMU sessions recorded Super+Enter opening Foot, Super+Space
+opening Fuzzel and launching Foot, workspace switching, rightward focus,
+fullscreen and floating toggles. Retained screenshots and compositor JSON are
+under `.cache/qa-uefi` and `.cache/qa-e7-uefi`. These earlier interactions support
+the unchanged bindings but are not a claim that every shortcut was exercised
+on the final ISO. Directional moves, all resize directions, split changes and
+workspace transfers across multiple monitors remain outside the recorded
+interaction evidence. Monitor transfers also require a second active output.
