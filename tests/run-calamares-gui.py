@@ -23,7 +23,9 @@ p.add_argument('--qmp',type=Path,required=True)
 p.add_argument('--evidence',type=Path,required=True)
 p.add_argument('--credentials',type=Path,required=True)
 p.add_argument('--confirm-disposable-vda',action='store_true',required=True)
+p.add_argument('--install-timeout',type=int,default=1800,help='Maximum real installer observation time in seconds; emulated ARM hosts may need 3600.')
 a=p.parse_args()
+if not 60 <= a.install_timeout <= 7200:p.error('--install-timeout must be 60..7200 seconds')
 a.evidence.mkdir(parents=True,exist_ok=True)
 ssh=['ssh','-o','BatchMode=yes','-o',f'UserKnownHostsFile={a.known_hosts}','-i',str(a.key),'-p',str(a.port),'root@127.0.0.1']
 base=Path(__file__).parent
@@ -78,7 +80,7 @@ input_action('account');capture('wizard-users-filled.png')
 input_action('next');capture('wizard-summary.png')
 input_action('confirm-install')
 # Read actual job completion; GUI click exit status is not a test result.
-for attempt in range(180):
+for attempt in range((a.install_timeout+9)//10):
  time.sleep(10)
  log=remote('cat /root/.cache/calamares/session.log')
  (a.evidence/'installer.log').write_text(log)
@@ -87,5 +89,5 @@ for attempt in range(180):
  if 'completion: succeeded' in log:
   capture('installer-complete.png');break
 else:
- capture('installer-timeout.png');raise SystemExit('No actual Calamares completion after 30 minutes')
+ capture('installer-timeout.png');raise SystemExit('No actual Calamares completion within configured timeout')
 print('GUI installation jobs completed; independent disk boot/login/APT remain mandatory.')
