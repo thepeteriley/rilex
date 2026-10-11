@@ -28,6 +28,9 @@ def command(name,args=None):
   if 'return' in r:return r['return']
 command('qmp_capabilities')
 blocks=command('query-block')
+# QEMU's Unix QMP listener admits one client. Release the inventory connection
+# before the screenshot/keyboard subprocesses open their own connections.
+f.close();s.close()
 (a.evidence/'independent-block-devices.json').write_text(json.dumps(blocks,indent=2))
 if any(b.get('removable') and b.get('inserted') for b in blocks):
  raise SystemExit('Refusing claim of independent boot with inserted removable media')
