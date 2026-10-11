@@ -104,8 +104,16 @@ try:
         if not all(re.search(r'^\s*' + prop + r'\s*:', inspect.stdout, re.M)
                    for prop in ('fd', 'path', 'num-buffers')):
             raise RuntimeError('Installed pipewiresrc lacks required fd/path/num-buffers properties')
+        serial = streams[0][1].get('pipewire-serial')
+        if serial is not None:
+            if not re.search(r'^\s*target-object\s*:', inspect.stdout, re.M):
+                raise RuntimeError('Provider returned a serial but pipewiresrc lacks target-object')
+            target = f'target-object={serial}'
+        else:
+            target = f'path={streams[0][0]}'
+        log('gstreamer_target', property=target)
         pipeline = ['gst-launch-1.0', '-v', 'pipewiresrc', f'fd={remote_fd}',
-                    f'path={streams[0][0]}', 'num-buffers=5', '!',
+                    target, 'num-buffers=5', '!',
                     'fakesink', 'sync=false', 'silent=false']
         capture = subprocess.run(pipeline, pass_fds=(remote_fd,), text=True,
                                  capture_output=True, timeout=a.timeout)

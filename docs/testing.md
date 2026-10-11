@@ -236,3 +236,9 @@ authorized portal FD into the child without closing the portal session, and
 requires five actual fakesink buffer messages plus EOS and successful pipeline
 completion. A handshake success remains distinct from this buffer check and
 from application-specific browser sharing.
+
+When the provider supplies `pipewire-serial`, the frame probe uses the inspected
+GStreamer `target-object` property rather than the deprecated node-ID `path`.
+This follows ScreenCast version6 guidance and the installed PipeWire plugin's
+serial-target interface. A first actual attempt using `path` failed with
+`target not found` and zero buffers; it must not be counted as frame success.
