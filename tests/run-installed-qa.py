@@ -15,7 +15,7 @@ p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--qmp',type=Path,required=True)
 p.add_argument('--credentials',type=Path,required=True)
 p.add_argument('--evidence',type=Path,required=True)
-p.add_argument('--serial',type=Path,required=True)
+p.add_argument('--serial-log',dest='serial',type=Path,required=True)
 p.add_argument('--boot-wait',type=int,default=180)
 a=p.parse_args();base=Path(__file__).parent
 a.evidence.mkdir(parents=True,exist_ok=True)
@@ -48,12 +48,12 @@ qmp('type','sudo -v');qmp('key','ret');time.sleep(3)
 password();qmp('key','ret');time.sleep(3)
 # Run in the normal created user's graphical terminal. Environment/session
 # checks catch failed login instead of treating keyboard API success as proof.
-check="( set -e; test $(id -u) -ne 0; test $(id -un) = rilexqa; test ! -d /run/live/medium; grep -qx ID=rilex /etc/os-release; test -s /boot/grub/grub.cfg; hyprctl version; pgrep -u $(id -u) -x waybar; pgrep -u $(id -u) -x foot; systemctl is-active NetworkManager; systemctl --user is-active pipewire wireplumber; systemctl --user is-active xdg-desktop-portal-hyprland; sudo apt-get update; printf '\\nRILEX_INSTALLED_CHECK_PASS\\n'; ) 2>&1 | sudo tee /dev/ttyS0"
+check="( set -e; test $(id -u) -ne 0; test $(id -un) = rilexqa; test ! -d /run/live/medium; grep -qx ID=rilex /etc/os-release; test -s /boot/grub/grub.cfg; hyprctl version; pgrep -u $(id -u) -x waybar; pgrep -u $(id -u) -x foot; systemctl is-active NetworkManager; systemctl --user is-active pipewire wireplumber; systemctl --user is-active xdg-desktop-portal-hyprland; sudo apt-get update; printf '\\nRILEX_INSTALLED_QA_PASS\\n'; ) 2>&1 | sudo tee /dev/ttyS0"
 qmp('type',check);qmp('key','ret')
 for attempt in range(90):
  time.sleep(5)
  serial=a.serial.read_text(errors='replace') if a.serial.exists() else ''
- if '\nRILEX_INSTALLED_CHECK_PASS\r' in serial or '\nRILEX_INSTALLED_CHECK_PASS\n' in serial:
+ if '\nRILEX_INSTALLED_QA_PASS\r' in serial or '\nRILEX_INSTALLED_QA_PASS\n' in serial:
   screenshot('independent-checks-passed.png')
   (a.evidence/'independent-result.txt').write_text('PASS actual normal graphical login, Hyprland, Waybar, Foot, networking/audio/portal and APT refresh with no CD media attached.\n')
   print('PASS actual independent installed-system checks');break
