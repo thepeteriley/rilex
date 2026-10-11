@@ -215,3 +215,16 @@ overlay appears in the captured desktop; because startup notifications expire,
 that screenshot alone cannot prove their absence during the first 15 seconds.
 The separate installation test must use this replacement image before these
 live boot results can qualify a release.
+
+For interactive portal QA in an ordinary desktop user's session,
+`python3 tests/qa-filechooser-portal.py` keeps a real FileChooser.OpenFile
+request alive until selection or cancellation. It records the actual response
+and file URIs; cancellation does not count as selection success.
+`python3 tests/qa-screencast-portal.py` follows the
+[official ScreenCast session API](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.ScreenCast.html),
+requires successful asynchronous CreateSession/SelectSources/Start responses,
+and checks the stream node and OpenPipeWireRemote file descriptor. The provider's
+actual source-selection dialog must be approved. This proves a portal handshake
+only, not captured video frames or a browser application's screen sharing.
+Both scripts require Debian's python3-gi and time out after180seconds; they are
+QA tools and are not included in the desktop image.
