@@ -92,3 +92,33 @@ as a symlink. Dropbox had been hashing actively written VM files continuously.
 The rename stayed on the same filesystem; both QA VMs remained running and
 QMP endpoints passed status checks. Credentials remain in the ignored private
 cache directory, not the source or distribution image.
+
+## Resumed 2026-10-11
+
+The VMs and build outputs survived the interrupted work. The local emulated
+Debian build completed a real hybrid ISO from frozen 530981f plus the documented
+identity hook overlay: 1,769,701,376 bytes, SHA-256
+`437642510f6e79a67fe12f0a36bd1fbd6171702ae4f20639d9e0b1ed9dca5e6e`.
+Its ISO structure passed; older desktop defects exclude it from release.
+
+Corrected e7fd8e4 booted its unmodified desktop in QEMU 11.1.2 on macOS ARM64.
+All 17 live-session assertions passed, including Hyprland, Waybar, signed-base
+identity, NetworkManager, PipeWire/WirePlumber and both desktop portals.
+Screenshot and output are under `.cache/qa-e7-uefi`. The ephemeral QA SSH
+bootstrap changes only the disposable live overlay, not the desktop settings
+or the ISO. These service checks do not establish laptop hardware support.
+
+Hosted b252079 candidate run38078483245 completed. Both ISO and defaults
+package attestations were cryptographically verified against the repository's
+`build.yml` signer using `gh attestation verify`; embedded source provenance
+now records its exact commit. Its ISO SHA-256 is
+`847d08e15d16b7ace6debd1a041e67676e25b52c65d640a508d89a681df2e2ba`,
+size 1,769,701,376 bytes. Structural boot checks passed.
+
+The earlier diagnostic installer completed all 41 jobs on the disposable
+32 GB virtual disk. Read-only target checks passed EFI GRUB, kernel/initrd,
+normal sudo user, live-account cleanup and official APT sources. Independent
+boot and normal-user login are being verified; this older diagnostic image
+is not the release candidate. Unsupported media-APT jobs were removed after
+checking that our ISO contains no Debian package archive. Final source
+7d25250 is building in run38145470988; final-image installation remains a gate.
