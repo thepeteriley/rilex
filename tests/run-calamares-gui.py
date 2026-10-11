@@ -59,6 +59,16 @@ time.sleep(25)
 remote("DISPLAY=:0 xdotool keyup Super_L Super_R Alt_L Alt_R Control_L Control_R Shift_L Shift_R")
 subprocess.run(['python3',str(base/'qmp.py'),'--explicit-key-events',str(a.qmp),'key','meta_l-f'],check=True)
 time.sleep(5)
+# Fixed Qt coordinates are permitted only after actual compositor geometry
+# and focused fullscreen installer verification; otherwise stop before disk UI.
+state=json.loads(remote("python3 - <<'END'\nimport json,subprocess\npid=subprocess.check_output(['pgrep','-u','live','-x','foot']).decode().split()[0]\nenv=dict(x.split('=',1) for x in open('/proc/'+pid+'/environ').read().split('\\0') if '=' in x)\ndef get(name): return json.loads(subprocess.check_output(['runuser','-u','live','--','hyprctl','-j',name],env=env))\nprint(json.dumps({'monitors':get('monitors'),'active':get('activewindow')}))\nEND"))
+(a.evidence/'installer-geometry.json').write_text(json.dumps(state,indent=2))
+active=state['active']
+monitor=next((m for m in state['monitors'] if m.get('id')==active.get('monitor')),None)
+if not monitor or (monitor.get('width'),monitor.get('height'),monitor.get('scale'),monitor.get('transform')) != (1280,800,1,0):
+ capture('unsupported-installer-geometry.png');raise SystemExit('Installer coordinate assumptions do not match actual 1280x800 scale1 monitor')
+if 'calamares' not in active.get('class','').lower() or not active.get('fullscreen'):
+ capture('installer-not-focused-fullscreen.png');raise SystemExit('Actual active window is not fullscreen Calamares')
 capture('wizard-01-welcome.png')
 for name in ['location','keyboard','partition']:
  input_action('next');capture('wizard-'+name+'.png')
