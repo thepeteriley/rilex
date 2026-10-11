@@ -192,3 +192,15 @@ uses its dialog for unresponsive applications; official backports provide a
 compatible small package. It will be added and a new image rebuilt/retested
 before release. This successful installation qualifies `feaca70`, not a future
 image. No release/tag exists yet.
+
+Corrected native-QEMU installation QA run38148591896 was independently
+inspected, not inferred from its exit code. Candidate feaca7002 and controller
+ac759823 completed all38 Calamares jobs, all17 live assertions, created-user
+password login, actual Hyprland/Waybar/Foot and service checks, then a signed
+APT metadata refresh with the strict guest success marker. The independent
+QMP inventory and boot command contain no virtual CD. Screenshots and raw
+logs are preserved in `.cache/qa-native-install-38148591896` and the workflow
+artifact. Earlier run38147436556 installed successfully but its controller
+held the sole QMP connection open during screenshot capture; that QA bug was
+fixed. Neither outcome qualifies the newer GUI-utils candidate until its own
+run38156156216 completes and its actual evidence is inspected.
