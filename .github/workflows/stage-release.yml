@@ -1,0 +1,96 @@
+name: Stage verified ISO release asset
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful build workflow run
+        required: true
+        type: string
+      installation_run_id:
+        description: Successful real installation QA workflow run
+        required: true
+        type: string
+      tag:
+        description: Existing release tag matching the exact image source
+        required: true
+        type: string
+      iso_sha256:
+        description: Independently verified ISO SHA-256
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: read
+  attestations: read
+concurrency:
+  group: stage-release-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      INSTALL_RUN_ID: ${{ inputs.installation_run_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      EXPECTED_ISO_SHA256: ${{ inputs.iso_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require successful build, installation and existing draft
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ && "$INSTALL_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$EXPECTED_ISO_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > build-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$INSTALL_RUN_ID" > install-run.json
+          jq -e '.conclusion == "success" and .path == ".github/workflows/build.yml"' build-run.json
+          jq -e '.conclusion == "success" and .path == ".github/workflows/installation-qa.yml"' install-run.json
+          source_sha=$(jq -r .head_sha build-run.json)
+          test "$(git rev-list -n 1 "$RELEASE_TAG")" = "$source_sha"
+          printf '%s\n' "$source_sha" > expected-source.txt
+          gh release view "$RELEASE_TAG" --json isDraft | jq -e '.isDraft == true'
+      - uses: actions/download-artifact@v4
+        with:
+          name: rilex-candidate
+          path: candidate
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: rilex-installation-qa-evidence
+          path: evidence
+          run-id: ${{ inputs.installation_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify actual image and installed-guest evidence
+        run: |
+          set -euo pipefail
+          test "$(cat candidate/source-revision.txt)" = "$(cat expected-source.txt)"
+          test -f candidate/rilex-0.1-amd64.iso
+          test ! -L candidate/rilex-0.1-amd64.iso
+          printf '%s  %s\n' "$EXPECTED_ISO_SHA256" candidate/rilex-0.1-amd64.iso | sha256sum --check
+          (cd candidate && sha256sum --check rilex-0.1-amd64.iso.sha256)
+          rg -x "candidate=$(cat expected-source.txt)" evidence/revisions.txt
+          rg '^RILEX_INSTALLED_QA_PASS\r?$' evidence/installed-serial.log
+          rg '^PASS actual normal graphical login' evidence/installed/independent-result.txt
+          gh attestation verify candidate/rilex-0.1-amd64.iso \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build.yml"
+      - name: Upload ISO to draft and verify remote digest
+        run: |
+          set -euo pipefail
+          gh release view "$RELEASE_TAG" --json isDraft | jq -e '.isDraft == true'
+          gh release view "$RELEASE_TAG" --json assets > release-assets.json
+          if jq -e '.assets[] | select(.name == "rilex-0.1-amd64.iso")' release-assets.json; then
+            echo 'ISO asset already exists; refusing to replace it.' >&2
+            exit 1
+          fi
+          gh release upload "$RELEASE_TAG" candidate/rilex-0.1-amd64.iso
+          gh release view "$RELEASE_TAG" --json assets > release-assets.json
+          expected_bytes=$(stat -c %s candidate/rilex-0.1-amd64.iso)
+          jq -e --arg digest "sha256:$EXPECTED_ISO_SHA256" --argjson size "$expected_bytes" \
+            '.assets[] | select(.name == "rilex-0.1-amd64.iso") | .digest == $digest and .size == $size' release-assets.json
+          echo 'Verified ISO staged. Draft stays unpublished for final maintainer review.'

@@ -64,3 +64,30 @@ Only QEMU-created qcow2 disks belong to this build and test process. Never pass 
 The stable base uses `https://deb.debian.org/debian` and `https://security.debian.org/debian-security`; Debian archive signature checks remain enabled. Hyprland 0.55.2, Hyprlock 0.9.6, and the Hyprland XDG portal 1.4.1 are exact official backports package versions in the tracked hook. No testing or unstable suite is enabled and no upstream source compilation is needed. Dependencies resolve through Debian's signed repositories. Available package versions can change; failure to find a pinned package is an actionable build error, not a reason to drop verification or silently change versions.
 
 These commands reproduce the build process. Byte-for-byte reproducibility is not claimed because Debian security repositories evolve. Preserve the package manifest and build log for every candidate; see [packaging/README.md](../packaging/README.md) for the Rilex package delivery boundary.
+
+## Stage a qualified ISO for publication
+
+After inspecting actual live-boot and installation evidence, create a version
+tag at the exact image source and an unpublished GitHub draft release. The
+manually dispatched `stage-release.yml` workflow transfers the large ISO from
+its successful build artifact directly to that draft. It requires the build
+run ID, successful installation QA run ID, existing tag and independently
+verified ISO SHA-256. It checks the tag/source match, actual installed-guest
+success marker and build attestation before upload, then verifies GitHub's
+asset size and SHA-256 digest. It refuses to replace an existing ISO and leaves
+the draft unpublished for final review. This avoids a slow local upload without
+rebuilding or modifying the qualified image.
+
+For the qualified 0.1 image the exact dispatch was:
+
+```sh
+gh workflow run stage-release.yml \
+  -f build_run_id=38148757735 \
+  -f installation_run_id=38156156216 \
+  -f tag=v0.1.0 \
+  -f iso_sha256=0ecd67abaabd1d796619f98ba59b1b1f7d2c90f262be4ece5e2bee5fca65235e
+```
+
+Publication remains a separate maintainer action after reviewing the staged
+assets and release notes. No signing keys or account secrets are stored in the
+repository; the workflow uses GitHub's scoped job token.
