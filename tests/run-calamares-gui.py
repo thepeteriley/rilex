@@ -54,9 +54,10 @@ with os.fdopen(fd,'w') as f:
 # wrapper. This does not patch the ISO or replace Calamares jobs.
 remote("python3 - <<'END'\nimport os,subprocess\npids=subprocess.check_output(['pgrep','-u','live','-x','foot']).decode().split()\nif not pids: raise SystemExit('Need ordinary live Foot environment')\nenv=dict(x.split('=',1) for x in open('/proc/'+pids[0]+'/environ').read().split('\\0') if '=' in x)\nlog=open('/tmp/rilex-qa-installer.log','w')\nsubprocess.Popen(['runuser','-u','live','--','rilex-install'],env=env,stdout=log,stderr=log,start_new_session=True)\nEND")
 time.sleep(25)
-# Hyprland bind toggles the focused installer to fullscreen, matching tested
-# page coordinates. Use guest-time XTEST to avoid emulation timer key repeats.
-remote("DISPLAY=:0 xdotool keyup Super_L Super_R Alt_L Alt_R Control_L Control_R Shift_L Shift_R; DISPLAY=:0 xdotool key --clearmodifiers super+f")
+# Hyprland sees actual QMP input rather than XWayland-only synthetic keys.
+# Immediate down/up avoids emulation timer key repeats.
+remote("DISPLAY=:0 xdotool keyup Super_L Super_R Alt_L Alt_R Control_L Control_R Shift_L Shift_R")
+subprocess.run(['python3',str(base/'qmp.py'),'--explicit-key-events',str(a.qmp),'key','meta_l-f'],check=True)
 time.sleep(5)
 capture('wizard-01-welcome.png')
 for name in ['location','keyboard','partition']:
